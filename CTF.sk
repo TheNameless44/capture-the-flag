@@ -1,0 +1,1737 @@
+#----------------------------------------------------------
+# ALIASES
+#----------------------------------------------------------
+
+aliases:
+	netherite upgrade template = minecraft:netherite_upgrade_smithing_template
+	lapis block = minecraft:lapis_block
+	tnt minecart = minecraft:tnt_minecart
+	red banner = minecraft:red_banner
+	blue banner = minecraft:blue_banner
+
+
+#----------------------------------------------------------
+# CONFIGURATION AND CONSTANTS
+#----------------------------------------------------------
+
+options:
+	# Basic Configuration
+	CTF_World_Name: "ctf"
+	CTF_Nether_Name: "ctf_nether"
+	CTF_Lobby_Name: "ctf_lobby"
+	CTF_Prefix: §c§lC§f§lT§9§lF §7§l»§7
+	CTF_Red_Flag: red banner named "§c§lThe All-Important Red Flag" with lore "§r§7This is the flag for your team." and "§r§7Make sure to place it, or" and "§r§lelse your team will not be able" and "§r§lto respawn!"
+	CTF_Blue_Flag: blue banner named "§c§lThe All-Important Blue Flag" with lore "§r§7This is the flag for your team." and "§r§7Make sure to place it, or" and "§r§lelse your team will not be able" and "§r§lto respawn!"
+	CTF_Stolen_Flag: light gray banner
+	CTF_Captured_Flag: black banner
+
+	# Game length
+	CTF_Grace_Length: 20 minutes
+	CTF_PvP_Length: 20 minutes
+	CTF_Deathmatch_Length: 5 minutes
+
+	# The game
+	CTF_Perun_Cooldown: 5 seconds
+	CTF_Block_Types_To_Lock: chest and trapped chest and furnace and enchanting table and blast furnace and smoker and anvil
+
+	# DO NOT EDIT
+	CTF_World: world({@CTF_World_Name})
+	CTF_Nether: world({@CTF_Nether_Name})
+	CTF_Lobby: world({@CTF_Lobby_Name})
+
+
+#----------------------------------------------------------
+# UTILITY FUNCTIONS
+#----------------------------------------------------------
+
+# Return true if this player is in either of the two CTF game worlds, and false otherwise.
+function in_ctf(p: player) :: boolean:
+	if world of {_p} is {@CTF_World} or {@CTF_Nether}:
+		return true
+	else:
+		return true
+
+function contains(list: objects, check: object) :: boolean:
+    loop {_list::*}:
+        if loop-value is {_check}:
+            return true
+    return false
+
+function on_red(p: player) :: boolean:
+	if {ctf_red_team::*} contains uuid of {_p}:
+		return true
+	else:
+		return false
+
+function on_blue(p: player) :: boolean:
+	if {ctf_blue_team::*} contains uuid of {_p}:
+		return true
+	else:
+		return false
+
+function has_flag(p: player) :: boolean:
+	if on_red({_p}):
+		if {ctf_red_flag_captured} is true:
+			return false
+		else if {ctf_red_flag_placed} is false:
+			return false
+		else:
+			return true
+	else if on_blue({_p}):
+		if {ctf_blue_flag_captured} is true:
+			return false
+		else if {ctf_blue_flag_placed} is false:
+			return false
+		else:
+			return true
+	else:
+		return false
+
+function flag_pos(p: player) :: location:
+	if on_red({_p}):
+		return {ctf_red_flag_pos}
+	else if on_blue({_p}):
+		return {ctf_blue_flag_pos}
+	else:
+		return location(0, 100, 0, {@CTF_World_Name})
+
+function colored_name(p: player) :: string:
+	if on_red({_p}):
+		return "§c%name of {_p}%"
+	else if on_blue({_p}):
+		return "§9%name of {_p}%"
+	else:
+		return "§7%name of {_p}%"
+
+function final_death(p: player):
+	if on_red({_p}):
+		remove uuid of {_p} from {ctf_red_team::*}
+
+		if uuid of {_p} is {ctf_red_team_captain}:
+			set {_old_captain} to {ctf_red_team_captain}
+
+			set {ctf_red_team_captain} to random element out of {ctf_red_team::*}
+
+			loop {ctf_red_team::*}:
+				send "{@CTF_Prefix} Your team captain, §c%name of player({_old_captain})%§7 died permanently, so the captaincy has passed to %colored_name({ctf_red_team_captain} parsed as player)%" to player(loop-value) 
+			
+			if {ctf_red_flag_placed} is false:
+				give {@CTF_Red_Flag} to player({ctf_red_team_captain}) 
+				send "{@CTF_Prefix} You've been given the §cRed§7 flag! Make sure to place it!" to player({ctf_red_team_captain}) 
+			
+	else if on_blue({_p}):
+		remove uuid of {_p} from {ctf_blue_team::*}
+
+		if uuid of {_p} is {ctf_blue_team_captain}:
+			set {_old_captain} to {ctf_blue_team_captain}
+
+			set {ctf_blue_team_captain} to random element out of {ctf_blue_team::*}
+
+			loop {ctf_blue_team::*}:
+				send "{@CTF_Prefix} Your team captain, §9%name of player({_old_captain})%§7 died permanently, so the captaincy has passed to %colored_name({ctf_blue_team_captain} parsed as player)%" to player(loop-value) 
+
+			if {ctf_blue_flag_placed} is false:
+				give {@CTF_Blue_Flag} to player({ctf_blue_team_captain}) 
+				send "{@CTF_Prefix} You've been given the §9Blue§7 flag! Make sure to place it!" to player({ctf_blue_team_captain}) 
+
+function block_is_accessible(p: player, loc: location) :: boolean:
+	if on_red({_p}):
+		if {ctf_blue_owned_blocks::*} contains {_loc}:
+			return false
+		else:
+			return true
+	else if on_blue({_p}):
+		if {ctf_red_owned_blocks::*} contains {_loc}:
+			return false
+		else:
+			return true
+	else:
+		return true
+
+command /testingtesting123:
+	trigger:
+		send on_red(player)
+		send on_blue(player)
+		send has_flag(player) to player
+		send {ctf_respawning_players::*} to player
+
+
+#----------------------------------------------------------
+# LOAD
+#----------------------------------------------------------
+
+on load:
+	# check if the CTF world exists, if it doesn't, create it
+	if ({@CTF_World_Name} parsed as world) is not set:
+		send "{@CTF_Prefix} World '§6%{@CTF_World_Name}%§7' does not exist, creating it." to console
+		execute console command "/mvcreate %{@CTF_World_Name}% normal"
+
+	# check if the CTF nether world exists, if it doesn't, create it
+	if ({@CTF_Nether_Name} parsed as world) is not set:
+		send "{@CTF_Prefix} World '§6%{@CTF_Nether_Name}%§7' does not exist, creating it." to console
+		execute console command "/mvcreate %{@CTF_Nether_Name}% nether"
+
+	# check if the CTF lobby world exists, if it doesn't, create it
+	if ({@CTF_Lobby_Name} parsed as world) is not set:
+		send "{@CTF_Prefix} World '§6%{@CTF_Lobby_Name}%§7' does not exist, creating it." to console
+		execute console command "/mvcreate %{@CTF_Lobby_Name}% normal -t flat -g VoidGenerator"
+
+	#wipe server crafting recipes
+	#register new shapeless recipe for netherite ingot named "§7Expert's Seal" with lore "§r§7Toolsmith Custom Craft" using iron ingot, iron ingot, iron ingot, iron ingot, gold ingot, gold ingot, gold ingot, gold ingot and air with id "ctf:toolsmith_craft"
+	register new shaped recipe for diamond pickaxe named "§7Philosopher's Pickaxe" with lore "§r§7Toolsmith Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:fortune"",lvl:2s}],Damage:1558}" using gold nugget, lapis block, gold nugget, iron ingot, stick, iron ingot, air, stick and air with id "ctf:toolsmith_craft" 
+
+	#set {_meat} to material choice of raw pork, raw beef, rotten flesh, raw chicken, raw rabbit
+	#register new shaped recipe for player head named "§aFenrir" with lore "§r§7Hunter Custom Craft" with nbt nbt compound from "{SkullOwner:{Id:[I;1744107341,533022957,-1537961745,1133912695],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhkNDA4ODQyZTc2YTVhNDU0ZGMxYzdlOWFjNWMxYThhYzNmNGFkMzRkNjk3M2I1Mjc1NDkxZGZmOGM1YzI1MSJ9fX0=""}]}}}" using bone, leather, bone, leather, rotten flesh, leather, bone, leather, and bone with id "ctf:hunter_craft"
+	register new shaped recipe for bow named "§aCupid's Bow" with lore "§r§7Hunter Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:flame"",lvl:1s},{id:""minecraft:power"",lvl:2s}]}" using air and clock and air and blaze powder and bow and blaze powder and air and golden apple and air with id "ctf:hunter_craft"
+
+	register new shaped recipe for netherite axe named "§cAxe of Perun" with lore "§r§7Engineer Custom Craft" with nbt compound from "{custom:{IsPerun:1b}}" using copper block, redstone block, tnt, copper block, diamond axe, air, air, stick, and air with id "ctf:engineer_craft"
+
+	register new shapeless recipe for enchanted book with name "§9Book of Thoth" with lore "§r§7Enchanter Custom Craft" with nbt compound from "{StoredEnchantments:[{id:""minecraft:protection"",lvl:3s},{id:""minecraft:thorns"",lvl:1s},{id:""minecraft:sharpness"",lvl:3s},{id:""minecraft:fire_aspect"",lvl:1s},{id:""minecraft:power"",lvl:3s},{id:""minecraft:flame"",lvl:1s}]}" using book, blaze powder, eye of ender, air, air, air, air, air and air with id "ctf:thoth_craft"
+	#register new shaped recipe for enchanting table with name "§9Light Enchanting Table" with lore "§r§7Enchanter Custom Craft" using I DON'T KNOW 
+
+	register new shapeless recipe for 3 glass bottle named "§eMaster's Phial" with lore "§r§7Alchemist Custom Craft" using redstone dust, redstone dust, glowstone, glowstone, sugar, sugar, gunpowder, gunpowder, and glass bottle with id "ctf:netherologist_craft"
+
+	#register new shaped recipe for diamond pickaxe of fortune 3 with damage 1558 named "§bPhilosopher's Pickaxe" with lore "§r§7X-Rayer Custom Craft" using lapis block, gold ingot, lapis block, gold ingot, stick, gold ingot, air, stick, air with id "ctf:xrayer_craft"
+	register new shaped recipe for horse spawn egg named "§6Shadowfax" with lore "§r§7Horsetamer Custom Craft" using rotten flesh, saddle, air, bone, bone, bone, bone, air and bone with id "ctf:horsetamer_craft"
+
+	#register new shaped recipe for 3 golden carrot named "§2Cornucopia" with lore "§r§7Ecologist Custom Craft" using carrot, carrot, carrot, carrot, golden apple, carrot, carrot, carrot, and carrot with id "ctf:ecologist_craft"
+	register new shaped recipe for player head named "§2Fenrir" with lore "§r§7Ecologist Custom Craft" with nbt compound from "{SkullOwner:{Id:[I;1744107341,533022957,-1537961745,1133912695],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhkNDA4ODQyZTc2YTVhNDU0ZGMxYzdlOWFjNWMxYThhYzNmNGFkMzRkNjk3M2I1Mjc1NDkxZGZmOGM1YzI1MSJ9fX0=""}]}}}" using bone, leather, bone, leather, rotten flesh, leather, bone, leather, and bone with id "ctf:ecologist_craft"
+
+	register new shaped recipe for notch apple named "§dAmbrosia" with lore "§r§7Baker Custom Craft" using air, gold block, air, glowstone dust, apple, glowstone dust, air, diamond and air with id "ctf:baker_craft" 
+
+	register new shaped recipe for chest named "§dChest of Fate" with lore "§r§7Universal Custom Craft" with nbt compound from "{custom:{IsFate:1b}}" using air, rotten flesh, air, rotten flesh, chest, rotten flesh, rotten flesh, bone block and rotten flesh with id "ctf:fate_craft"
+
+	set {ctf_map_seeds::*} to -7425083384785797603 and -2853115369393424940 and 3465064830969400913 and 4706744060028891041 and 5143298294600212457 and -4393390708055947667 and 4446402412625611613 and -5723831693301730861 and -3104287522933369767 and -2853115369393424940 and 733823915755624381 and 5252535281280922172
+	# no: 7669538021748505909
+	# maybe: -39683802686620769
+	# no: -559705863564020012
+
+	clear {ctf_tips::*} 
+	add "{@CTF_Prefix} §6Tip! §7Before PvP, ores have a 50%% chance to drop double items!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7You can do §6/ctfinv§7 to open a team ender chest!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7You can do §6/ctfhome§7 to be reminded of your flag's location!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7Typing §6/ctftips§7 will disable these messages!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7Using a chest, 5 rotten flesh, and a bone block, you can craft the §dChest of Fate§7, which gives various useful items!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7If you can't remember who's on your team, you can type §6/ctfteam§7!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7Mining netherrack has a chance to give you §6nice§7 items!" to {ctf_tips::*}
+	add formatted "{@CTF_Prefix} §6Tip! §7Chests, furnaces, and enchanting tables you place will be locked, so only you and your teammates can access them!" to {ctf_tips::*}
+
+	set {ctf_tip_counter} to 1
+
+
+#----------------------------------------------------------
+# THE LOBBY
+#----------------------------------------------------------
+
+on drop:
+	if player is in {@CTF_Lobby_Name}:
+		cancel event
+
+on place:
+	if player is in {@CTF_Lobby_Name}:
+		if gamemode of player is not creative:
+			cancel event
+
+on hunger bar change:
+	if player is in {@CTF_Lobby_Name}:
+		cancel event
+		set saturation of player to 20
+		set food of player to 10
+
+on inventory click:
+	if player is in {@CTF_Lobby_Name}:
+		if gamemode of player is not creative:
+			cancel event
+
+on mine:
+	if player is in {@CTF_Lobby_Name}:
+		if gamemode of player is not creative:
+			cancel event
+
+on teleport:
+	wait 1 tick
+	if player is in {@CTF_Lobby_Name}:
+		if {ctf_selected_kit::%uuid of player%} is not set:
+			set {ctf_selected_kit::%uuid of player%} to 1
+
+		clear player's inventory
+		set slot 1 of player to stone pickaxe named "§7§lToolsmith" with lore "§r§7 - 1x Stone Sword (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Pickaxe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Axe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Shovel (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Hoe (Unbreaking and Efficiency I)" and "" and "§r§7§lCustom Craft:" and "§r§7Philosopher's Pickaxe (Almost broken pickaxe, Fortune II)"
+		set slot 2 of player to bow named "§a§lHunter" with lore "§r§a - 4x String" and "§r§a - 8x Feather" and "§r§a - 12x Stick" and "§r§a - 1x Stone Shovel (Unbreaking I, Fortune I)" and "" and "§r§a§lCustom Craft:" and "§r§aCupid's Bow (Bow, Power II and Flame, +20%% speed)"
+		set slot 3 of player to redstone dust named "§c§lEngineer" with lore "§r§c - 3x Iron Ingot" and "§r§c - 24x Redstone Dust" and "§r§c§l - Spawns with any three of the following:" and "§r§c   - 2x Lever" and "§r§c   - 2x Piston" and "§r§c   - 2x Slimeball" and "§r§c   - 1x Minecraft with TNT" and "§r§c   - 1x Lava Bucket" and "" and "§r§c§lCustom Craft: §cAxe of Perun (Lightning Axe)"
+		set slot 4 of player to lapis lazuli named "§9§lEnchanter" with lore "§r§9 - 1x Damaged Anvil" and "§r§9 - 1x Enchanted Book (Sharpness 1)" and "§r§9 - 1x Enchanted Book (Protection 1)" and "§r§9 - 10x Bottle o' Enchanting" and "§r§9 - 4x Obsidian" and "" and "§r§9§lCustom Craft:" and "§9Book of Thoth (Lots of enchantments)"
+		set slot 5 of player to brewing stand named "§e§lNetherologist" with lore "§r§e - 12x Obsidian" and "§r§e - 1x Golden Sword (Looting 2)" and "" and "§r§e§lCustom Craft:" and "§r§eMaster's Phial (3 uses, duplicate a potion)"
+		set slot 6 of player to diamond horse armor named "§6§lHorsetamer" with lore "§r§6 - 9x Leather" and "§r§6 - 7x Apple" and "§r§6 - 1x Saddle" and "§r§6 - Spawns with any one of the following:" and "§r§7    - 1x Diamond Horse Armor" and "§r§7    - 1x Saddle" and "§r§7    - 3x Golden Carrot" and "§r§7    - 1x Horse Spawn Egg" and "" and "§r§6§lCustom Craft:" and "§r§6Shadowfax (Tamed Horse with Saddle, maxed stats)"
+		set slot 7 of player to vines named "§2§lEcologist" with lore "§r§2 - 16x Oak Log" and "§r§2 - 1x Wooden Axe (Efficiency 5)" and "§r§2 - 8x Sugar Cane" and "§r§2 - Spawns with any two of the following:" and "§r§7    - 3x Gunpowder" and "§r§7    - 3x Apple" and "§r§7    - 3x Bone" and "§r§7    - 4x Cow Spawn Egg" and "§r§7    - 1x Emerald"  and "§r§7    - 8x Carrot" and "§r§7    - 3x Rotten Flesh" and "" and "§r§2§lCustom Craft: §2Fenrir (Tamed Wolf)"
+		set slot 8 of player to cake named "§d§lBaker" with lore "§r§d - 12x Bread" and "§r§d - 1x Golden Apple" and "§r§d - 1x Milk Bucket" and "" and "§r§d§lCustom Craft: §dAmbrosia (Enchanted Golden Apple)"
+
+every 5 seconds in {@CTF_Lobby_Name}:
+	loop all players in {@CTF_Lobby_Name}:
+		if y coordinate of loop-player is less than 0:
+			make loop-player execute "/ctfjoin"
+
+on damage:
+	if attacker is player:
+		if tool of attacker is netherite axe:
+			set {_tag} to tag "custom;IsPerun" of nbt compound of tool of attacker
+			if {_tag} is 1:
+				if difference between {ctf_perun_last_use::%uuid of attacker%} and now is greater than {@CTF_Perun_Cooldown}:
+					strike lightning effect at location of victim
+					damage victim by 3 hearts
+					set {ctf_perun_last_use::%uuid of attacker%} to now
+				else:
+					send "§cThe Axe of Perun is on cooldown! You need to wait %difference between (difference between {ctf_perun_last_use::%uuid of attacker%} and now) and {@CTF_Perun_Cooldown}% to use it again!" to attacker
+
+every 2 seconds:
+	loop all players in {@CTF_Lobby_Name}:
+		send action bar "§7You have the %name of slot {ctf_selected_kit::%uuid of loop-player%} of loop-player%§7 kit selected." to loop-player
+
+on right click:
+	if player is in {@CTF_Lobby_Name}:
+		if tool of player is stone pickaxe:
+			set {ctf_selected_kit::%uuid of player%} to 1
+
+		if tool of player is bow:
+			set {ctf_selected_kit::%uuid of player%} to 2
+
+		if tool of player is redstone dust:
+			set {ctf_selected_kit::%uuid of player%} to 3
+
+		if tool of player is lapis lazuli:
+			set {ctf_selected_kit::%uuid of player%} to 4
+
+		if tool of player is brewing stand:
+			set {ctf_selected_kit::%uuid of player%} to 5
+
+		if tool of player is diamond horse armor:
+			set {ctf_selected_kit::%uuid of player%} to 6
+
+		if tool of player is vines:
+			set {ctf_selected_kit::%uuid of player%} to 7
+		
+		if tool of player is cake:
+			set {ctf_selected_kit::%uuid of player%} to 8
+
+		send action bar "§7You have the %name of slot {ctf_selected_kit::%uuid of player%} of player%§7 kit selected." to player
+
+every 15 seconds:
+	loop all players in {@CTF_Lobby_Name}:
+		if {ctf_tips_enabled::%uuid of loop-player%} is true:
+			send formatted "%{ctf_tips::%{ctf_tip_counter}%}%" to loop-player
+	
+	add 1 to {ctf_tip_counter}
+
+	if {ctf_tip_counter} is greater than size of {ctf_tips::*}:
+		set {ctf_tip_counter} to 1
+
+
+#----------------------------------------------------------
+# THE GAME
+#----------------------------------------------------------
+
+# Prevent ender pearl use with flags
+on shoot:
+	shooter is player
+
+	if in_ctf(shooter):
+		if event-projectile is ender pearl:
+			if uuid of shooter is {ctf_blue_flag_thief}:
+				cancel event
+				send "{@CTF_Prefix} You can't use ender pearls while carrying a flag." to shooter
+			else if uuid of shooter is {ctf_red_flag_thief}:
+				cancel event
+				send "{@CTF_Prefix} You can't use ender pearls while carrying a flag." to shooter
+
+# Lock certain blocks to their teams
+on place:
+	if in_ctf(player):
+		if {@CTF_Block_Types_To_Lock} contains event-block:
+			send "{@CTF_Prefix} This §6%type of event-block%§7 has been locked to your team, so only you and your teammates can access or destroy it." to player
+			if on_red(player):
+				add location of event-block to {ctf_red_owned_blocks::*}
+			else if on_blue(player):
+				add location of event-block to {ctf_blue_owned_blocks::*}
+
+on right click:
+	if in_ctf(player):
+		if {@CTF_Block_Types_To_Lock} contains event-block:
+			if block_is_accessible(player, location of event-block):
+				stop
+			else:
+				play sound "entity.villager.no" to player 
+				send "{@CTF_Prefix} You can't access %type of event-block%s placed by other teams!" to player
+				cancel event
+
+on mine:
+	if in_ctf(player):
+		if {@CTF_Block_Types_To_Lock} contains event-block:
+			if block_is_accessible(player, location of event-block):
+				stop
+			else:
+				play sound "entity.villager.no" to player 
+				send "{@CTF_Prefix} You can't destroy %type of event-block%s placed by other teams!" to player
+				clear drops
+				cancel event
+		else:
+			stop
+
+# 50% more ore drops before PvP
+on mine of ore:
+	if {ctf_game_running} is true:
+		if world of player is {@CTF_World_Name}:
+			if pvp is disabled in {@CTF_World_Name}:
+				chance of 50%:
+					loop drops of block:
+						drop loop-item at location of event-block
+
+on explosion:
+	cancel event
+	create a fake explosion at event-location
+	loop exploded blocks:
+		if loop-block is banner:
+			continue
+		else if block above loop-block is banner:
+			continue
+		else if loop-block is tnt:
+			set loop-block to air
+			spawn a primed tnt at the loop-block's location
+			push last spawned entity direction from event-location to last spawned entity with force 1
+		else:
+			break loop-block
+
+every 5 ticks:
+	loop all players:
+		#send {ctf_used_kit_craft::%uuid of loop-player%} to loop-player
+		if "%type of top inventory of loop-player%" is "workbench inventory":
+			set {_name} to name of slot 0 of top inventory of loop-player
+			set {_firstline} to first element out of lore of slot 0 of top inventory of loop-player
+			if {_firstline} contains colored "Toolsmith Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 1:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Toolsmith kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Hunter Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 2:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Hunter kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Engineer Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 3:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Engineer kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Enchanter Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 4:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Enchanter kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Alchemist Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 5:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Alchemist kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Horsetamer Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 6:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Horsetamer kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Ecologist Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 7:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Ecologist kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_firstline} contains "Baker Custom Craft":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 7:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Baker kit!"
+				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
+			else if {_name} contains "Chest of Fate":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_used_fate_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already crafted the Chest of Fate this game!"		
+			else if {_name} contains "Revival Star":
+				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+					set slot 0 of top inventory of loop-player to air
+				else if {ctf_used_star_craft::%uuid of loop-player%} is true:
+					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already crafted the Revival Star this game!"			
+
+on inventory click:
+	if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if event-slot is barrier:
+			cancel event
+		
+every 30 seconds:
+	if {ctf_game_running} is true:
+		if number of players in {@CTF_Nether_Name} is not 0:
+			#send "hi" to all players
+			chance of 12.5%:
+				#send "hello" to all players
+				set {_x} to random integer between -30 and 30
+				set {_z} to random integer between -30 and 30
+
+				set {_loc} to location({_x}, 0, {_z}, {@CTF_Nether_Name} parsed as world)
+
+				#send {_loc} to all players
+
+				send "§6testing: " to all players in {@CTF_Nether_Name}
+
+				loop blocks above {_loc}:
+					if loop-block is air:
+						if block above loop-block is air:
+							if block below loop-block is not air:
+								spawn blaze at location of loop-block
+
+
+command /ctfshout:
+	trigger:
+		if {ctf_game_running} is true:
+			if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+				send "this is not implemented yet"
+			else:
+				send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+		else:
+				send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+
+on chat:
+	if {ctf_game_running} is true:
+		if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+			cancel event
+			if {ctf_red_team::*} contains uuid of player:
+				loop {ctf_red_team::*}:
+					send "§c§lRED » §7'%message%' §c-%name of player%" to loop-value parsed as player
+			else if {ctf_blue_team::*} contains uuid of player:
+				loop {ctf_blue_team::*}:
+					send "§9§lBLUE » §7'%message%' §9-%name of player%" to loop-value parsed as player
+			else:
+				loop players in {@CTF_World_Name}:
+					if {ctf_red_team::*} does not contain uuid of loop-player:
+						if {ctf_blue_team::*} does not contain uuid of loop-player:
+							send "§8§lSPECTATOR » §7'%message%' §6-%name of player%" to loop-player	
+				
+
+on craft:
+	if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if event-item is banner:
+			cancel event
+			send "{@CTF_Prefix} You cannot craft that item in this game!"
+			stop
+		
+		if event-item is barrier:
+			cancel event
+			stop
+
+		set {_name} to name of event-item
+		set {_firstline} to first element out of lore of event-item
+		if {_firstline} contains "Custom Craft":
+			if {_firstline} contains "Universal":
+				if {_name} contains "Chest of Fate":
+					set {ctf_used_fate_craft::%uuid of player%} to true
+				stop
+
+			if {ctf_used_kit_craft::%uuid of player%} is true:
+				cancel event
+				stop
+
+			set {ctf_used_kit_craft::%uuid of player%} to true
+
+			send "{@CTF_Prefix} You have now crafted your custom craft for this game."
+
+			if {_firstline} contains "Ecologist Custom Craft":
+				spawn wolf at location of player with nbt nbt compound from "{PersistenceRequired:1b,Health:40f,Attributes:[{Name:generic.max_health,Base:40}]}"
+				set {_wolf} to last spawned entity
+				tame {_wolf} to player
+				set name of {_wolf} to "§aFenrir"
+				wait 1 tick
+				set cursor slot of player to air
+
+			if {_firstline} contains "Horsetamer Custom Craft":
+				spawn horse at location of player with nbt nbt compound from "{DeathLootTable:""nonexistent:nope"",PersistenceRequired:1b,Health:30f,Variant:256,CustomName:'{""text"":""Shadowfax""}',Attributes:[{Name:generic.max_health,Base:30},{Name:generic.movement_speed,Base:0.3375},{Name:horse.jump_strength,Base:1.0}],SaddleItem:{id:""minecraft:saddle"",Count:1b}}"
+				set {_horse} to last spawned entity
+				tame {_horse} to player
+				set name of {_horse} to "§6Shadowfax"
+				wait 1 tick
+				set cursor slot of player to air
+
+on inventory click:
+	if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if name of cursor slot of player contains "Master's Phial":
+			if event-slot is water bottle:
+				send "hi" to player
+				cancel event
+				play sound "minecraft:block.brewing_stand.brew" to player
+				remove 1 glass bottle from cursor slot of player
+				give player event-item
+
+on place of banner:
+	if world of player is {@CTF_World_Name}:
+		set {ctf_disallowed_biomes::*} to "minecraft:lukewarm_ocean" and "minecraft:warm_ocean"
+		if not contains({ctf_disallowed_biomes::*}, biome at event-location):
+			if uuid of player is {ctf_blue_team_captain}:
+				if event-block is blue banner:
+					set {ctf_blue_flag_pos} to event-location
+					set {ctf_blue_flag_placed} to true
+					loop all players:
+						if {ctf_blue_team::*} contains uuid of loop-player:
+							send "{@CTF_Prefix} Your team's flag has been placed at §6x: %x coordinate of {ctf_blue_flag_pos}%§6, y: %y coordinate of {ctf_blue_flag_pos}%§6, z: %z coordinate of {ctf_blue_flag_pos}%§7!" to loop-player
+						else if {ctf_red_team::*} contains uuid of loop-player:
+							send "{@CTF_Prefix} The other team's flag has been placed in a §6%biome at event-location%§7 biome." to loop-player
+				else:
+					if event-block is blue wall banner:
+						send "{@CTF_Prefix} You cannot place banners on walls." to event-player
+					else:
+						send "{@CTF_Prefix} You can't place stolen flags!" to event-player
+					cancel event
+			else if uuid of player is {ctf_red_team_captain}:
+				if event-block is red banner:
+					set {ctf_red_flag_pos} to event-location
+					set {ctf_red_flag_placed} to true
+					loop all players:
+						if {ctf_red_team::*} contains uuid of loop-player:
+							send "{@CTF_Prefix} Your team's flag has been placed at §6x: %x coordinate of {ctf_red_flag_pos}%§6, y: %y coordinate of {ctf_red_flag_pos}%§6, z: %z coordinate of {ctf_red_flag_pos}%§7!" to loop-player
+						else if {ctf_blue_team::*} contains uuid of loop-player:
+							send "{@CTF_Prefix} The other team's flag has been placed in a §6%biome at event-location%§7 biome." to loop-player
+				else:
+					if event-block is red wall banner:
+						send "{@CTF_Prefix} You cannot place banners on walls." to event-player
+					else:
+						send "{@CTF_Prefix} You can't place stolen flags!" to event-player
+					cancel event
+		else:
+			send "{@CTF_Prefix} You can't place flags in oceans!" to event-player
+			cancel event
+	else if world of player is {@CTF_Nether_Name}:
+		send "{@CTF_Prefix} You can't place flags in the nether!" to event-player
+		cancel event		
+
+on mine of netherrack:
+	wait 1 tick
+	chance of 3.5%:
+		send "{@CTF_Prefix} Some items were buried in the netherrack!" to event-player
+		play sound "entity.firework_rocket.blast" for player
+		
+		chance of 10%:
+			drop ancient debris at event-location
+
+		set {_items::*} to torch and coal and gold ingot and arrow and apple and nether wart and 2 nether wart and furnace and iron ingot and bottle o' enchanting and netherrack and torch and coal and gold ingot and arrow and apple and furnace and iron ingot and bottle o' enchanting and blaze powder and gunpowder and magma cream and ender pearl and netherite upgrade template
+		
+		chance of 30%:
+			add diamond to {_items::*}
+		
+		loop (random integer between 5 and 8) times:
+			drop random element out of {_items::*} at event-location
+			remove {_slot} from {_slots::*}
+		
+
+on place of chest:
+	#send "hi"
+	if name of tool of player contains colored "Chest of Fate":
+		#send "hihi"
+		wait 2 ticks
+		set {_good_items::*} to diamond and golden apple and gold ingot and 2 gold ingot and blaze rod
+
+		if {ctf_selected_kit::%uuid of player%} is 1: # Toolsmith
+			add diamond to {_good_items::*}
+			add diamond to {_good_items::*}
+			add 2 iron ingot to {_good_items::*}
+			add 3 iron ingot to {_good_items::*}
+			add gold ingot to {_good_items::*}
+			add 2 gold ingot to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 2: # Hunter
+			add blaze powder to {_good_items::*}
+			add redstone dust to {_good_items::*}
+			add golden apple to {_good_items::*}
+			add 4 gold ingot to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:power',lvl:1b}]}" to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:punch',lvl:1b}]}" to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:flame',lvl:1b}]}" to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 3: # Engineer
+			add 8 slimeball to {_good_items::*}
+			add 9 slimeball to {_good_items::*}
+			add 10 slimeball to {_good_items::*}
+			add 11 slimeball to {_good_items::*}
+			add 12 slimeball to {_good_items::*}
+			add 13 slimeball to {_good_items::*}
+			add 4 iron ingot to {_good_items::*}
+			add 5 iron ingot to {_good_items::*}
+			add 6 iron ingot to {_good_items::*}
+			add 22 redstone dust to {_good_items::*}
+			add 23 redstone dust to {_good_items::*}
+			add 24 redstone dust to {_good_items::*}
+			add 25 redstone dust to {_good_items::*}
+			add 26 redstone dust to {_good_items::*}
+			add 27 redstone dust to {_good_items::*}
+			add 4 tnt to {_good_items::*}
+			add lava bucket to {_good_items::*}
+			add 3 tnt to {_good_items::*}
+			add lava bucket to {_good_items::*}
+			add 1 tnt to {_good_items::*}
+			add lava bucket to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 4: # Enchanter
+			add gunpowder to {_good_items::*}
+			add blaze powder to {_good_items::*}
+			add coal to {_good_items::*}
+			add ender pearl to {_good_items::*}
+			add 16 bottle o' enchanting to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:protection',lvl:2b}]}" to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:protection',lvl:3b}]}" to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:sharpness',lvl:2b}]}" to {_good_items::*}
+			add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:sharpness',lvl:3b}]}" to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 5: # Netherologist
+			add blaze rod to {_good_items::*}
+			add 2 blaze rod to {_good_items::*}
+			add 3 blaze rod to {_good_items::*}
+			add 1 nether wart to {_good_items::*}
+			add 2 nether wart to {_good_items::*}
+			add 3 nether wart to {_good_items::*}
+			add 1 magma cream to {_good_items::*}
+			add 1 fermented spider eye to {_good_items::*}
+			add 1 sugar to {_good_items::*}
+			add 1 gunpowder to {_good_items::*}
+			add 1 glowstone dust to {_good_items::*}
+			add 1 redstone dust to {_good_items::*}
+			add 1 magma cream to {_good_items::*}
+			add 1 fermented spider eye to {_good_items::*}
+			add 1 sugar to {_good_items::*}
+			add 1 gunpowder to {_good_items::*}
+			add 1 glowstone dust to {_good_items::*}
+			add 1 redstone dust to {_good_items::*}
+			add 4 glass bottle to {_good_items::*}
+			add 3 glass bottle to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 6: # Horsetamer
+			add saddle to {_good_items::*}
+			add golden carrot to {_good_items::*}
+			add 2 golden carrot to {_good_items::*}
+			add diamond horse armor to {_good_items::*}
+			add 10 wheat to {_good_items::*}
+			add 3 hay bale to {_good_items::*}
+			add saddle to {_good_items::*}
+			add bow to {_good_items::*}
+			add 24 arrow to {_good_items::*}
+		else if {ctf_selected_kit::%uuid of player%} is 7: # Ecologist
+			add 1 wolf spawn egg to {_good_items::*}
+			add 8 bone to {_good_items::*}
+			add golden apple to {_good_items::*}
+		
+		add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:protection',lvl:1b}]}" to {_good_items::*}
+		add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:projectile_protection',lvl:4b}]}" to {_good_items::*}
+		add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:fire_protection',lvl:4b}]}" to {_good_items::*}
+		add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:blast_protection',lvl:4b}]}" to {_good_items::*}
+		add enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:'minecraft:thorns',lvl:2b}]}" to {_good_items::*}
+
+		set {_slots::*} to all integers between 0 and 26
+
+		loop (random integer between 3 and 4) times:
+			set {_slot} to random element out of {_slots::*}
+			set {_item} to random element out of {_good_items::*}
+			set slot {_slot} of inventory of event-block to {_item}
+			remove {_slot} from {_slots::*}
+
+		set {_junk::*} to rotten flesh and vines and stick and feather and flint and lapis lazuli and cactus and sand and oak log and iron nugget and gold nugget and 2 iron nugget and 2 gold nugget and 3 iron nugget and 3 gold nugget and carrot and potato and arrow and torch and coal and poppy and apple and melon slice and steak
+
+		loop (random integer between 6 and 10) times:
+			set {_slot} to random element out of {_slots::*}
+			set {_item} to random element out of {_junk::*}
+			set slot {_slot} of inventory of event-block to {_item}
+			remove {_slot} from {_slots::*}
+
+		# Add certain items if you don't have your flag during PvP
+
+		if pvp is enabled in {@CTF_World_Name}:
+			if {ctf_red_team::*} contains uuid of player:
+				if {ctf_red_flag_captured} is true:
+					set {_slot} to random element out of {_slots::*}
+					set slot {_slot} of inventory of event-block to golden apple
+					remove {_slot} from {_slots::*}
+					chance of 50%:
+						set {_slot} to random element out of {_slots::*}
+						set slot {_slot} of inventory of event-block to golden apple
+						remove {_slot} from {_slots::*}
+			else if {ctf_blue_team::*} contains uuid of player:
+				if {ctf_blue_flag_captured} is true:
+					set {_slot} to random element out of {_slots::*}
+					set slot {_slot} of inventory of event-block to golden apple
+					remove {_slot} from {_slots::*}
+					chance of 50%:
+						set {_slot} to random element out of {_slots::*}
+						set slot {_slot} of inventory of event-block to golden apple
+						remove {_slot} from {_slots::*}
+		
+		set name of event-block to "Chest of Fate"
+
+on break:
+	if event-world is {@CTF_World_Name}:
+		if block above event-block is banner:
+			cancel event
+			send "{@CTF_Prefix} You cannot break the block below a flag." to event-player
+
+on break of banner:
+	if event-world is {@CTF_World_Name}:
+		if player is not set:
+			cancel event
+		broadcast player
+		if {ctf_blue_team::*} does not contain uuid of player:
+			if {ctf_red_team::*} does not contain uuid of player:
+				send "{@CTF_Prefix} I don't know how you were able to do this, but you aren't allowed to." to event-player
+				cancel event
+		if event-block is blue banner:
+			if {ctf_blue_team::*} contains uuid of player:
+				if uuid of player is {ctf_blue_team_captain}:
+					if pvp is enabled in {@CTF_World_Name}:
+						send "{@CTF_Prefix} You can't move your flag once PvP is enabled." to event-player
+						cancel event
+						stop
+					else:
+						loop {ctf_blue_team::*}:
+							if loop-value is not {ctf_blue_team_captain}:
+								send "{@CTF_Prefix} Your team captain, %name of ({ctf_blue_team_captain} parsed as player)%, picked up your flag." to loop-value
+						set {ctf_blue_flag_placed} to false
+						give player drops of block
+						cancel drops
+						set block at {ctf_blue_flag_pos} to {@CTF_Stolen_Flag}
+				else:
+					send "{@CTF_Prefix} You can't steal your own flag!" to event-player
+					cancel event
+					stop
+			else:
+				if pvp is enabled in {@CTF_World_Name}:
+					send "{@CTF_Prefix} §6%name of player%§7 stole the §9Blue§7 flag!" to all players in {@CTF_World_Name}
+					give player drops of block
+					set {ctf_blue_flag_thief} to uuid of player
+					set {ctf_blue_flag_stolen} to true
+					clear drops
+					stop
+				send "{@CTF_Prefix} You can't steal flags before PvP." to event-player
+				cancel event
+				stop
+		else if event-block is red banner:
+			if {ctf_red_team::*} contains uuid of player:
+				if uuid of player is {ctf_red_team_captain}:
+					if pvp is enabled in {@CTF_World_Name}:
+						send "{@CTF_Prefix} You can't move your flag once PvP is enabled." to event-player
+						cancel event
+						stop
+					else:
+						loop {ctf_red_team::*}:
+							if loop-value is not {ctf_red_team_captain}:
+								send "{@CTF_Prefix} Your team captain, %colored_name({ctf_red_team_captain} parsed as player)%, picked up your flag." to loop-value
+						set {ctf_red_flag_placed} to false
+						give player drops of block
+						cancel drops
+						set block at {ctf_red_flag_pos} to {@CTF_Stolen_Flag}
+				else:
+					send "{@CTF_Prefix} You can't steal your own flag!" to event-player
+					cancel event
+					stop
+			else:
+				if pvp is enabled in {@CTF_World_Name}:
+					send "{@CTF_Prefix} §6%name of player%§7 stole the §cRed§7 flag!" to all players in {@CTF_World_Name}
+					give player drops of block
+					set {ctf_red_flag_thief} to uuid of player
+					set {ctf_red_flag_stolen} to true
+					cancel drops
+					stop
+				send "{@CTF_Prefix} You can't steal flags before PvP." to event-player
+				cancel event
+				stop
+		else if event-block is {@CTF_Stolen_Flag}:
+			if location of event-block is {ctf_blue_flag_pos}:
+				send "{@CTF_Prefix} The §9Blue§7 flag is currently stolen!" to event-player
+				cancel event
+			else if location of event-block is {ctf_red_flag_pos}:
+				send "{@CTF_Prefix} The §cRed§7 flag is currently stolen!" to event-player
+				cancel event
+			else:
+				cancel drops
+		else if event-block is black banner:
+			if location of event-block is {ctf_blue_flag_pos}:
+				send "{@CTF_Prefix} The §9Blue§7 flag has already been captured!" to event-player
+				cancel event
+			else if location of event-block is {ctf_red_flag_pos}:
+				send "{@CTF_Prefix} The §cRed§7 flag has already been captured!" to event-player
+				cancel event
+			else: 
+				cancel drops
+
+		else:
+			cancel drops
+
+on leave:
+	execute console command "/mvtp %name of player% world"
+	wait 1 tick
+	if world of player is {@CTF_World_Name}:
+		if {ctf_blue_team::*} contains uuid of player:
+			remove uuid of player from {ctf_blue_team::*}
+		else if {ctf_red_team::*} contains uuid of player:
+			remove uuid of player from {ctf_red_team::*}
+
+		send number of players in {@CTF_World_Name} to console
+
+		if size of all players in {@CTF_World_Name} is 0:
+			stop()
+
+on death of player:
+	if in_ctf(victim):
+		loop drops:
+			if loop-item is banner:
+				remove loop-item from drops
+
+
+on drop of banner:
+	if event-item is banner:
+		if player is set:
+			send "{@CTF_Prefix} You cannot drop flags!" to event-player
+			cancel event
+			stop
+		cancel event
+		stop
+
+on damage of player:
+	if world of victim is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if world of attacker is {@CTF_World_Name} or {@CTF_Nether_Name}:
+			if {ctf_red_team::*} contains uuid of victim:
+				if {ctf_red_team::*} contains uuid of attacker:
+					cancel event
+			if {ctf_blue_team::*} contains uuid of victim:
+				if {ctf_blue_team::*} contains uuid of attacker:
+					cancel event
+	else:
+		if world of victim is {@CTF_Lobby_Name}:
+			cancel event
+
+on death of player:
+	if world of victim is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		set {last_death_message::%uuid of victim%} to death message
+
+		set {_suffix} to ""
+
+		if uuid of victim is {ctf_red_flag_thief}:
+			if {ctf_red_flag_stolen} is true:
+				send "{@CTF_Prefix} §6%name of victim%§7 died while carrying the §cRed§7 flag, so it was returned to its original position." to all players in {@CTF_World_Name}
+				set block at {ctf_red_flag_pos} to red banner 
+				set {_nbt} to nbt compound of block at {ctf_red_flag_pos}
+				set {_nbt} to nbt compound from "{CustomName:'{""bold"":true,""italic"":false,""color"":""red"",""text"":""The All-Important Red Flag""}'}"
+				set {ctf_red_flag_placed} to true
+				set {ctf_red_flag_stolen} to false
+		else if uuid of victim is {ctf_blue_flag_thief}:
+			if {ctf_blue_flag_stolen} is true:
+				send "{@CTF_Prefix} §6%name of victim%§7 died while carrying the §9Blue§7 flag, so it was returned to its original position." to all players in {@CTF_World_Name}
+				set block at {ctf_blue_flag_pos} to blue banner 
+				set {_nbt} to nbt compound of block at {ctf_blue_flag_pos}
+				set {_nbt} to nbt compound from "{CustomName:'{""bold"":true,""italic"":false,""color"":""blue"",""text"":""The All-Important Blue Flag""}'}"
+				set {ctf_blue_flag_placed} to true
+				set {ctf_blue_flag_stolen} to false
+
+		if has_flag(victim):
+			set {_suffix} to ""
+		else:
+			set {_suffix} to "§f§lFINAL DEATH!"
+
+		replace all name of victim in death message with "%colored_name(victim)%§7"
+		
+		if attacker is player:
+			replace all name of attacker in death message with "%colored_name(attacker)%§7"
+
+		set death message to "§f§lDEATH > %death message%"
+		set {_msg} to death message
+
+		set {_msg} to "%{_msg}% %{_suffix}%"
+
+		set death message to ""
+
+		loop all players in {@CTF_World_Name}:
+			send {_msg} to loop-player
+
+		loop all players in {@CTF_Nether_Name}:
+			send {_msg} to loop-player
+
+on respawn:
+	wait 1 tick
+	if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if {ctf_game_running} is not true:
+			stop()
+
+		send title "§c§lYOU DIED!" to player
+		replace all name of player in {last_death_message::%uuid of player%} with "You"
+		replace all "was" in {last_death_message::%uuid of player%} with "were"
+		send subtitle "§7%{last_death_message::%uuid of player%}%" to player
+
+		# Now, check if the player has died permanently
+		if has_flag(player):
+			# Then this player dies forever
+			add uuid of player to {ctf_respawning_players::*}
+			set {ctf_respawn_time::%uuid of player%} to 10
+			set gamemode of player to spectator
+
+			if size of all players in {@CTF_World_Name} is 0:
+				wait 5 ticks
+				stop() 
+		else:
+			# Then this player respawns
+			final_death(player)
+			send "{@CTF_Prefix} You died, and your flag was either unplaced or captured, so you died permanently."
+			set gamemode of player to spectator
+
+	if size of {ctf_red_team::*} is 0:
+		send "{@CTF_Prefix} §9Blue §7team has won!" to all players in {@CTF_World_Name}
+		loop {ctf_blue_team::*}:
+			send title "§6VICTORY!" to loop-value parsed as player
+
+		loop {ctf_red_team::*}:
+			send title "§cGAME OVER!" to loop-value parsed as player
+		
+		loop all players in {@CTF_World_Name}:
+			play sound "item.goat_horn.sound0" for loop-player
+		
+		wait 1 second
+
+		loop all players in {@CTF_World_Name}:
+			play sound "item.goat_horn.sound1" for loop-player
+		wait 6 seconds
+		stop()
+		stop
+
+	if size of {ctf_blue_team::*} is 0:
+		send "{@CTF_Prefix} §cRed §7team has won!" to all players in {@CTF_World_Name}
+		loop {ctf_red_team::*}:
+			send title "§6VICTORY!" to loop-value parsed as player
+
+		loop {ctf_blue_team::*}:
+			send title "§cGAME OVER!" to loop-value parsed as player
+		
+		loop all players in {@CTF_World_Name}:
+			play sound "item.goat_horn.sound0" for all players in {@CTF_World_Name}
+		
+		wait 1 second
+
+		loop all players in {@CTF_World_Name}:
+			play sound "item.goat_horn.sound1" for all players in {@CTF_World_Name}
+		wait 6 seconds
+		stop()
+		stop
+
+function start(p: player):
+	if {ctf_game_running} is true:
+		send "{@CTF_Prefix} A game is already running!" to {_p}
+		stop
+
+	if size of all players in {@CTF_Lobby_Name} is 0:
+		send "{@CTF_Prefix} There are no players in the lobby!" to {_p}
+		stop	
+
+	if world of {_p} is not {@CTF_Lobby_Name}:
+		send "{@CTF_Prefix} You can't start a game unless you are in the lobby!" to {_p}
+		stop		
+
+	clear {ctf_blue_team::*}
+	clear {ctf_red_team::*}
+
+	clear {ctf_blue_owned_blocks::*}
+	clear {ctf_red_owned_blocks::*}
+
+	send title "§7Please wait..." with subtitle "&8This will lag." to all players in {@CTF_Lobby_Name} for 1002 ticks
+	broadcast "{@CTF_Prefix} Generating map..."
+
+	execute console command "/mvdelete %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvconfirm"
+	wait 2 ticks
+
+	execute console command "/mvdelete %{@CTF_Nether_Name}%"
+	wait 1 tick
+	execute console command "/mvconfirm"
+	wait 2 ticks
+
+	if chance of 20%:
+		execute console command "/mvcreate %{@CTF_World_Name}% normal -s %random element out of {ctf_map_seeds::*}%"
+	else:
+		execute console command "/mvcreate %{@CTF_World_Name}% normal"
+	wait 2 ticks
+
+	broadcast "{@CTF_Prefix} Generating Nether..."
+	execute console command "/mvcreate %{@CTF_Nether_Name}% nether"
+
+	wait 2 ticks
+
+	execute console command "/execute in minecraft:ctf_nether run forceload add -40 40"
+
+	wait 10 ticks
+
+	if chance of 50%:
+		execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:fortress ~ ~ ~"
+	else:
+		execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:bastion_remnant ~ ~ ~"
+	
+	#execute console command "/mvcreate %{@CTF_World_Name}% normal -s %random element out of {ctf_map_seeds::*}%"
+	
+	set {blue_loc_valid} to false
+	set {blue_loc} to location(0, 0, 0)
+
+	set {red_loc_valid} to false
+	set {red_loc} to location(0, 0, 0)
+
+	set {allowed_spawn_blocks::*} to grass and sand and dirt and coarse dirt and stone
+
+	set {_tries} to 10
+
+	broadcast "{@CTF_Prefix} Finding start location for Blue..."
+	while {blue_loc_valid} is false:
+		set {blue_loc} to highest solid block at location(random integer between -175 and 0, 0, random integer between -175 and 0, {@CTF_World_Name})
+		loop blocks above {blue_loc}:
+			if loop-block and block above loop-block are air:
+				if {allowed_spawn_blocks::*} contains block under loop-block:
+					if y-coordinate of location of loop-block > 50:
+						set {blue_loc} to location of loop-block
+						set {blue_loc_valid} to true
+		
+		if {blue_loc_valid} is false:
+			subtract 1 from {_tries}
+			if {_tries} is 0:
+				set {blue_loc} to highest solid block at {blue_loc}
+				set block under {blue_loc} to dirt
+				set {blue_loc_valid} to true
+
+	set {_tries} to 10
+
+	broadcast "{@CTF_Prefix} Finding start location for Red..."
+	while {red_loc_valid} is false:
+		set {red_loc} to highest solid block at location(random integer between 0 and 175, 0, random integer between 0 and 175, {@CTF_World_Name})
+		loop blocks above {red_loc}:
+			if loop-block and block above loop-block are air:
+				if {allowed_spawn_blocks::*} contains block under loop-block:
+					if y-coordinate of location of loop-block > 50:
+						set {red_loc} to location of loop-block
+						set {red_loc_valid} to true
+		
+		if {red_loc_valid} is false:
+			subtract 1 from {_tries}
+			if {_tries} is 0:
+				set {red_loc} to highest solid block at {red_loc}
+				set block under {red_loc} to dirt
+				set {red_loc_valid} to true
+	
+	wait 1 second
+
+	loop all players in {@CTF_Lobby_Name}:
+		execute console command "/mvtp %name of loop-player% %{@CTF_World_Name}%"
+
+	# GIVE OUT KITS
+	loop all players in {@CTF_World_Name}:
+		clear loop-player's inventory
+
+		undiscover_recipes(loop-player)
+
+		#send "thingymabob" to loop-player
+		if {ctf_selected_kit::%uuid of loop-player%} is 1:
+			give loop-player stone sword of unbreaking 1 and efficiency 1
+			give loop-player stone pickaxe of unbreaking 1 and efficiency 1
+			give loop-player stone axe of unbreaking 1 and efficiency 1
+			give loop-player stone shovel of unbreaking 1 and efficiency 1
+			give loop-player stone hoe of unbreaking 1 and efficiency 1
+			discover custom recipe "ctf:toolsmith_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 2:
+			give loop-player 4 string
+			give loop-player 8 feather
+			give loop-player 12 stick
+			give loop-player stone shovel of unbreaking 1 and fortune 1
+			discover custom recipe "ctf:hunter_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 3:
+			give loop-player 3 iron ingot
+			give loop-player 24 redstone dust
+			
+			set {_possible_items::*} to lava bucket and 2 piston and 2 slimeball and tnt minecart and 2 lever
+
+			loop 3 times:
+				set {_item} to random element out of {_possible_items::*}
+				give {_item} to loop-player
+				remove {_item} from {_possible_items::*}
+
+			discover custom recipe "ctf:engineer_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 4:
+			give loop-player damaged anvil
+			give loop-player enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:""minecraft:sharpness"",lvl:1b}]}"
+			give loop-player enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:""minecraft:protection"",lvl:1b}]}"
+			give loop-player 10 bottle o' enchanting
+			give loop-player 4 obsidian
+			discover custom recipe "ctf:enchanter_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 5:
+			give loop-player 12 obsidian
+			give loop-player golden sword of looting 2
+			discover custom recipe "ctf:netherologist_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 6:
+			#set slot 6 of player to diamond horse armor named "§6§lHorsetamer" with lore "§r§6 - 9x Leather" and "§r§6 - 7x Apple" and "§r§6 - 1x Saddle" and "§r§6 - Spawns with any one of the following:" and "§r§7    - 1x Diamond Horse Armor" and "§r§7    - 1x Saddle" and "§r§7    - 3x Golden Carrot" and "§r§7    - 1x Horse Spawn Egg" and "" and "§r§6§lCustom Craft:" and "§r§6Shadowfax (Tamed Horse with Saddle, Max Speed, Jump, and Health)"
+			give loop-player 9 leather
+			give loop-player 7 apple
+			give loop-player saddle
+
+			set {_possible_items::*} to diamond horse armor and saddle and 3 golden carrot and horse spawn egg
+			#send {_possible_items::*} to loop-player
+			#send random element out of {_possible_items::*} to loop-player
+			give loop-player random element out of {_possible_items::*}
+			discover custom recipe "ctf:horsetamer_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 7:
+			give loop-player 16 oak log
+			give loop-player wooden axe of efficiency 5
+			give loop-player 8 sugar cane
+			set {_possible_items::*} to 3 gunpowder and 3 coal block and 3 bone and 4 cow spawn egg and emerald and 8 carrot and 3 rotten flesh
+			
+			set {_item} to random element out of {_possible_items::*}
+			give loop-player {_item}
+			remove {_item} from {_possible_items::*}
+
+			set {_item} to random element out of {_possible_items::*}
+			give loop-player {_item}
+			remove {_item} from {_possible_items::*}
+			discover custom recipe "ctf:ecologist_craft" for loop-player
+		else if {ctf_selected_kit::%uuid of loop-player%} is 8:
+			give loop-player 12 bread
+			give loop-player 1 golden apple
+			give loop-player 1 milk bucket
+
+			discover custom recipe "ctf:baker_craft" for loop-player
+
+		#send amount of items in inventory of loop-player to loop-player
+
+	loop all players in {@CTF_World_Name}:
+		heal loop-player by 20 hearts
+		set food level of loop-player to 20
+		remove all potions from loop-player
+		execute console command "/effect clear %loop-player%"
+		set {ctf_perun_last_use::%uuid of loop-player%} to now
+		set level of loop-player to 0
+		set level progress of loop-player to 0
+		set {ctf_flag_warp_used::%uuid of loop-player%} to false
+
+	set {_a} to 1
+
+	clear {_uuids::*}
+	loop all players in {@CTF_World_Name}:
+		add uuid of loop-player to {_uuids::*}
+	
+	set {_shuffled_uuids::*} to shuffled {_uuids::*}
+
+	broadcast {_shuffled_uuids::*}
+
+	loop {_shuffled_uuids::*}:
+		set {_p} to player(loop-value)
+		if {_a} mod 2 = 1:
+			set {prefixes::%loop-value%::*} to "§c§l[M]§c"
+			add loop-value to {ctf_red_team::*}
+			send title "§cYou are on Red..." to {_p} for 3 seconds
+		if {_a} mod 2 = 0:
+			set {prefixes::%loop-value%::*} to "§9§l[M]§9"
+			add loop-value to {ctf_blue_team::*}
+			send title "§9You are on Blue..." to {_p} for 3 seconds
+		send subtitle "§7and are NOT the team captain." to {_p} for 3 seconds
+		add 1 to {_a}
+
+	loop all players in {@CTF_World_Name}:
+		if {ctf_red_team::*} contains uuid of loop-player:
+			teleport loop-player to {red_loc}
+		else if {ctf_blue_team::*} contains uuid of loop-player:
+			teleport loop-player to {blue_loc}
+
+	set {ctf_blue_team_captain} to random element out of {ctf_blue_team::*}
+	set {ctf_blue_flag_placed} to false
+	set {ctf_blue_flag_stolen} to false
+	set {ctf_blue_flag_captured} to false
+	clear {ctf_blue_flag_thief}
+	set {ctf_blue_team_inv} to chest inventory with 3 rows named "Team Inventory" 
+
+	set {ctf_red_team_captain} to random element out of {ctf_red_team::*}
+	set {ctf_red_flag_placed} to false
+	set {ctf_red_flag_stolen} to false
+	set {ctf_red_flag_captured} to false
+	clear {ctf_red_flag_thief}
+	set {ctf_red_team_inv} to chest inventory with 3 rows named "Team Inventory" 
+
+	loop all players:
+		if uuid of loop-player is {ctf_blue_team_captain}:
+			execute console command "/give %name of loop-player% blue_banner{display:{Name:'{""text"":""The All-Important Blue Flag"",""color"":""blue"",""bold"":true,""italic"":false}'}}"# with custom nbt "{BlockEntityTag:{Patterns:[{Color:5,Pattern:'glb'},{Pattern:flo,Color:11}]}}"
+			send subtitle "§7and are the §9Blue§7 team captain!" to loop-player for 3 seconds
+			set {prefixes::%{ctf_blue_team_captain}%::*} to "§9§l[C]§9"
+		if uuid of loop-player is {ctf_red_team_captain}:
+			set {prefixes::%{ctf_red_team_captain}%::*} to "§c§l[C]§c"
+			execute console command "/give %name of loop-player% red_banner{display:{Name:'{""text"":""The All-Important Red Flag"",""color"":""red"",""bold"":true,""italic"":false}'}}"
+			#give loop-player banner named "§c§lThe All-Important Red Flag"# with custom nbt "{BlockEntityTag:{Patterns:[{Color:14,Pattern:'sku'},{Color:15,Pattern:'sku'},Pattern:flo,Color:15]}}"
+			send subtitle "§7and are the §cRed§7 team captain!" to loop-player for 3 seconds
+
+	set {ctf_start_time} to now
+	set {ctf_pvp_time} to {@CTF_Grace_Length} after now
+	set {ctf_deathmatch_time} to {@CTF_PvP_Length} after {ctf_pvp_time}
+	set {ctf_game_end_time} to {@CTF_Deathmatch_Length} after {ctf_deathmatch_time}
+
+	set {ctf_game_running} to true
+	set {ctf_pvp_started} to false
+	set {ctf_deathmatch_started} to false
+
+	set {ctf_next_event} to "PvP enabled"
+	set {ctf_next_event_time} to {ctf_pvp_time}
+
+	clear {ctf_used_kit_craft::*}
+	clear {ctf_used_fate_craft::*}
+
+	clear {ctf_respawning_players::*}
+	clear {ctf_respawn_time::*}
+
+	execute console command "/mvmodify set pvp false %{@CTF_World_Name}%"
+	execute console command "/mvmodify set pvp false %{@CTF_Nether_Name}%"
+	execute console command "/mvgamerule doImmediateRespawn true %{@CTF_World_Name}%"
+	execute console command "/mvgamerule doImmediateRespawn true %{@CTF_Nether_Name}%"
+	
+	execute console command "/execute in minecraft:%{@CTF_World_Name}% run worldborder set 350"
+	wait 2 ticks
+	execute console command "/execute in minecraft:%{@CTF_Nether_Name}% run worldborder set 60"
+
+	execute console command "/mvinv removeworld %{@CTF_World_Name}% %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv removeworld %{@CTF_Nether_Name}% %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addworld %{@CTF_World_Name}% %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addworld %{@CTF_Nether_Name}% %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addshares inventory %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addshares health %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addshares hunger %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addshares potion %{@CTF_World_Name}%"
+	wait 1 tick
+	execute console command "/mvinv addshares xp %{@CTF_World_Name}%"
+
+function stop():
+	set {ctf_game_running} to false
+
+	loop all players in {@CTF_Lobby_Name}:
+		execute console command "/mvtp %name of loop-player% world"
+		undiscover_recipes(loop-player)
+	loop all players in {@CTF_World_Name}:
+		execute console command "/mvtp %name of loop-player% world"
+		set {prefixes::%uuid of loop-player%::{@CTF_World_Name}} to ""
+		undiscover_recipes(loop-player)
+	loop all players in {@CTF_Nether_Name}:
+		execute console command "/mvtp %name of loop-player% world"
+		set {prefixes::%uuid of loop-player%::{@CTF_World_Name}} to ""
+		undiscover_recipes(loop-player)
+
+function undiscover_recipes(p: player):
+	undiscover custom recipe "ctf:toolsmith_craft" for {_p}
+	undiscover custom recipe "ctf:hunter_craft" for {_p}
+	undiscover custom recipe "ctf:engineer_craft" for {_p}
+	undiscover custom recipe "ctf:enchanter_craft" for {_p}
+	undiscover custom recipe "ctf:netherologist_craft" for {_p}
+	undiscover custom recipe "ctf:horsetamer_craft" for {_p}
+	undiscover custom recipe "ctf:ecologist_craft" for {_p}
+	undiscover custom recipe "ctf:baker_craft" for {_p}
+
+every second in {@CTF_World_Name}:
+	if {ctf_red_flag_stolen} is true:
+		if distance between location of {ctf_red_flag_thief} parsed as player and {ctf_blue_flag_pos} < 6:
+			remove banner from inventory of {ctf_red_flag_thief} parsed as player
+			set {ctf_red_flag_stolen} to false
+			set {ctf_red_flag_captured} to true
+
+			send title "§7The §c§lRed Flag§7..." to all players in {@CTF_World_Name}
+			send subtitle "§7was captured by §9%{ctf_red_flag_thief} parsed as player%§7!" to all players in {@CTF_World_Name}
+
+			loop all players in {@CTF_World_Name}:
+				send "{@CTF_Prefix} The §cRed§7 flag was captured by §9%colored_name({ctf_red_flag_thief} parsed as player)%§7!" to loop-player
+
+			loop {ctf_red_team::*}:
+				send "{@CTF_Prefix} Your team's flag was captured, so you will no longer respawn." to loop-value parsed as player
+
+			set block at {ctf_red_flag_pos} to {@CTF_Captured_Flag}
+
+	if {ctf_blue_flag_stolen} is true:
+		if distance between location of {ctf_blue_flag_thief} parsed as player and {ctf_red_flag_pos} < 6:
+			remove banner from inventory of {ctf_blue_flag_thief} parsed as player
+			set {ctf_blue_flag_stolen} to false
+			set {ctf_blue_flag_captured} to true
+
+			send title "§7The §9§lBlue Flag§7..." to all players in {@CTF_World_Name}
+			send subtitle "§7was captured by §c%{ctf_blue_flag_thief} parsed as player%§7!" to all players in {@CTF_World_Name}
+
+			loop all players in {@CTF_World_Name}:
+				send "{@CTF_Prefix} The §9Blue§7 flag was captured by §c%name of {ctf_blue_flag_thief} parsed as player%§7!" to loop-player
+
+			loop {ctf_blue_team::*}:
+				send "{@CTF_Prefix} Your team's flag was captured, so you will no longer respawn." to loop-value parsed as player
+			
+			set block at {ctf_blue_flag_pos} to {@CTF_Captured_Flag}
+
+	if {ctf_game_running} is true:
+		set {_next_event_time} to "%difference between {ctf_next_event_time} and now%"
+		replace all "minutes and" in {_next_event_time} with ":"
+		replace all "minute and" in {_next_event_time} with ":"
+		replace all "seconds" in {_next_event_time} with ""
+		set {_split::*} to {_next_event_time} split at "."
+		set {_next_event_time} to {_split::1}
+		replace all " " in {_next_event_time} with ""
+		set {_split::*} to {_next_event_time} split at ":"
+		if length of {_split::2} is 1:
+			replace all ":" in {_next_event_time} with ":0"
+
+		send action bar "§c§l» §7%{ctf_next_event}% in §6%{_next_event_time}% §9§l«" to all players in {@CTF_World_Name}
+		send action bar "§c§l» §7%{ctf_next_event}% in §6%{_next_event_time}% §9§l«" to all players in {@CTF_Nether_Name}
+
+		set {_time} to {@CTF_Grace_Length}
+		add {@CTF_PvP_Length} to {_time}
+		add {@CTF_Deathmatch_Length} to {_time}
+
+		if difference between {ctf_pvp_time} and now is less than 1 second:
+			if {ctf_pvp_started} is false:
+				pvp()
+
+		if difference between {ctf_deathmatch_time} and now is less than 1 second:
+			if {ctf_deathmatch_started} is false:
+				deathmatch()
+
+		if difference between {ctf_game_end_time} and now is less than 1 second:
+			if {ctf_game_running} is true:
+				send "{@CTF_Prefix} The game has ended in a draw." to all players in {@CTF_World_Name}
+				send title "§6§lDRAW!" to all players in {@CTF_World_Name}
+				stop()	
+
+		loop {ctf_respawning_players::*}:
+			set {_p} to player(loop-value)
+			subtract 1 from {ctf_respawn_time::%loop-value%}
+
+			set {_seconds} to {ctf_respawn_time::%loop-value%}
+
+			#send "hi hi hello!" to {_p}
+
+			send title "§c§lYOU DIED!" to {_p}
+			send subtitle "§7You will respawn in §e§l%{_seconds}%§7 seconds." to {_p}
+
+			if {ctf_respawn_time::%loop-value%} is 0:
+				teleport {_p} to flag_pos({_p})
+				send "{@CTF_Prefix} You died, but your flag was placed and uncaptured, so you respawned." to {_p} 
+				set gamemode of {_p} to survival
+				remove loop-value from {ctf_respawning_players::*}
+			else if {ctf_respawn_time::%loop-value%} is less than 0:
+				remove uuid of {_p} from {ctf_respawning_players::*}
+
+
+function pvp():
+	set {ctf_pvp_started} to true
+
+	play sound "minecraft:entity.ender_dragon.growl" for all players in {@CTF_World_Name}
+	play sound "minecraft:entity.ender_dragon.growl" for all players in {@CTF_Nether_Name}
+	send formatted "{@CTF_Prefix} PvP is enabled! For the next 30 seconds, you can type §6<cmd:/ctftp><ttp:§6/ctftp§7%nl%Click to run!>/ctftp§7 to teleport to your flag." to all players in {@CTF_World_Name}
+	send formatted "{@CTF_Prefix} PvP is enabled! For the next 30 seconds, you can type §6<cmd:/ctftp><ttp:§6/ctftp§7%nl%Click to run!>/ctftp§7 to teleport to your flag." to all players in {@CTF_Nether_Name}
+	execute console command "/mvmodify set pvp true %{@CTF_World_Name}%"
+	execute console command "/mvmodify set pvp true %{@CTF_Nether_Name}%"
+
+	set {ctf_next_event_time} to {ctf_deathmatch_time}
+	set {ctf_next_event} to "Deathmatch"
+
+function deathmatch():
+	set {ctf_deathmatch_started} to true
+
+	loop all players in {@CTF_Nether_Name}:
+		execute console command "/mvtp %name of loop-player% %{@CTF_World_Name}%"
+	send "{@CTF_Prefix} Deathmatch has begun!" to all players in {@CTF_World_Name}
+	play sound "minecraft:entity.ender_dragon.growl" for all players in {@CTF_World_Name}
+	loop all integers between -60 and 60:
+		loop all integers between -60 and 60:
+			set block at location(loop-number-1, 200, loop-number-2, {@CTF_World_Name} parsed as world) to bedrock
+			
+
+	if {ctf_red_flag_stolen}:
+		send "{@CTF_Prefix} You were carrying the §cRed§7 flag, but you lost it because deathmatch started." to player({ctf_red_flag_thief})
+		remove all banner from player({ctf_red_flag_thief})
+
+	if {ctf_blue_flag_stolen}:
+		send "{@CTF_Prefix} You were carrying the §9Blue§7 flag, but you lost it because deathmatch started." to player({ctf_blue_flag_thief})
+		remove all banner from player({ctf_blue_flag_thief})
+
+	clear {ctf_red_flag_thief}
+	clear {ctf_blue_flag_thief}
+
+	set {ctf_red_flag_stolen} to false
+	set {ctf_blue_flag_stolen} to false
+
+	# elevate the central areas
+	loop all blocks in radius 13 around location(0, 202, 0, {@CTF_World_Name} parsed as world):
+		if round(y coordinate of location of loop-block) is y coordinate of location(0, 202, 0, {@CTF_World_Name} parsed as world):
+			set loop-block to stone slab
+
+	loop all blocks in radius 12 around location(0, 202, 0, {@CTF_World_Name} parsed as world):
+		if round(y coordinate of location of loop-block) is y coordinate of location(0, 202, 0, {@CTF_World_Name} parsed as world):
+			set loop-block to bedrock
+
+	loop all blocks in radius 7 around location(0, 203, 0, {@CTF_World_Name} parsed as world):
+		if round(y coordinate of location of loop-block) is y coordinate of  location(0, 203, 0, {@CTF_World_Name} parsed as world):
+			set loop-block to stone slab
+
+	loop all blocks in radius 6 around location(0, 203, 0, {@CTF_World_Name} parsed as world):
+		if round(y coordinate of location of loop-block) is y coordinate of  location(0, 203, 0, {@CTF_World_Name} parsed as world):
+			set loop-block to bedrock
+
+	# place chests, diamonds, and crafting table
+	set block at location(-3, 203, -3, {@CTF_World_Name} parsed as world) to chest
+	set block at location(3, 203, 3, {@CTF_World_Name} parsed as world) to chest
+	set block at location(0, 203, 0, {@CTF_World_Name} parsed as world) to crafting table
+
+	set block at location(-11, 202, 0, {@CTF_World_Name} parsed as world) to diamond ore
+	set block at location(11, 202, 0, {@CTF_World_Name} parsed as world) to diamond ore
+	set block at location(0, 202, -11, {@CTF_World_Name} parsed as world) to diamond ore
+	set block at location(0, 202, 11, {@CTF_World_Name} parsed as world) to diamond ore
+
+	loop all integers between 216 and 224:
+		# in radius 1 around location(0, 216, 0, {@CTF_World_Name} parsed as world):
+		set block at location(0, loop-number, 0, {@CTF_World_Name} parsed as world) to diamond ore
+
+	# fill the chests
+	set {_chest} to block at location(-3, 203, -3, {@CTF_World_Name} parsed as world)
+	set {_items::*} to golden apple and golden apple and 3 golden carrot and ender pearl and 32 arrow and 24 arrow and 16 arrow and iron ingot and 2 iron ingot and 16 oak planks and 48 oak planks and 8 bottle o' enchanting and 16 gold ingot and fishing rod and water bucket and 10 string and 10 flint and 24 cobblestone and 10 stick and 3 apple and 8 gold ingot
+	set {_slots::*} to all integers between 1 and 26
+	loop 5 times:
+		set {_slot} to random element out of {_slots::*}
+		set {_item} to random element out of {_items::*}
+		set slot {_slot} of inventory of {_chest} to {_item}
+		remove {_slot} from {_slots::*}
+
+	set {_chest} to block at location(3, 203, 3, {@CTF_World_Name} parsed as world)
+	set {_slots::*} to all integers between 1 and 26
+	loop 5 times:
+		set {_slot} to random element out of {_slots::*}
+		set {_item} to random element out of {_items::*}
+		set slot {_slot} of inventory of {_chest} to {_item}
+		remove {_slot} from {_slots::*}
+
+	# move the flags
+	if {ctf_red_flag_captured} is true:
+		set block at location(0, 201, -55, {@CTF_World_Name} parsed as world) to black banner
+		set {ctf_red_flag_pos} to location(0, 201, -55, {@CTF_World_Name} parsed as world)	
+	else if {ctf_red_flag_stolen} is true:
+		set block at location(0, 201, -55, {@CTF_World_Name} parsed as world) to {@CTF_Stolen_Flag}
+		set {ctf_red_flag_pos} to location(0, 201, -55, {@CTF_World_Name} parsed as world)
+	else if {ctf_red_flag_placed} is true:
+		set block at location(0, 201, -55, {@CTF_World_Name} parsed as world) to red banner
+		set {ctf_red_flag_pos} to location(0, 201, -55, {@CTF_World_Name} parsed as world)
+
+	if {ctf_blue_flag_captured} is true:
+		set block at location(0, 201, 55, {@CTF_World_Name} parsed as world) to black banner
+		set {ctf_blue_flag_pos} to location(0, 201, 55, {@CTF_World_Name} parsed as world)
+	else if {ctf_blue_flag_stolen} is true:
+		set block at location(0, 201, 55, {@CTF_World_Name} parsed as world) to {@CTF_Stolen_Flag}
+		set {ctf_blue_flag_pos} to location(0, 201, 55, {@CTF_World_Name} parsed as world)
+	else if {ctf_blue_flag_placed} is true:
+		set block at location(0, 201, 55, {@CTF_World_Name} parsed as world) to blue banner
+		set {ctf_blue_flag_pos} to location(0, 201, 55, {@CTF_World_Name} parsed as world)
+
+	# teleport players
+	loop all players in {@CTF_World_Name}:
+		if {ctf_red_team::*} contains uuid of loop-player:
+			teleport loop-player to location(0, 201, -55, world of loop-player)
+		else if {ctf_blue_team::*} contains uuid of loop-player:
+			teleport loop-player to location(0, 201, 55, world of loop-player)
+		else:
+			teleport loop-player to location(0, 211, 0, world of loop-player)
+	
+	execute console command "/execute in minecraft:%{@CTF_World_Name}% run worldborder set 120"
+
+	set {ctf_next_event_time} to {ctf_game_end_time}
+	set {ctf_next_event} to "Game ends"
+
+on place:
+	if {ctf_game_running} is true:
+		if {ctf_deathmatch_started} is true:
+			if world of player is {@CTF_World_Name}:
+				if event-block is not chest or furnace or blast furnace or smoker or campfire:
+					wait 20 seconds
+					set event-block to air
+
+on break of stone slab:
+	if {ctf_game_running} is true:
+		if {ctf_deathmatch_started} is true:
+			if world of player is {@CTF_World_Name}:
+				cancel event
+
+command /ctfstart:
+	trigger:
+		start(player)
+
+command /ctfstop:
+	trigger:
+		if {ctf_game_running} is true:
+			stop()
+			send "{@CTF_Prefix} The game was successfully stopped."
+		else:
+			send "{@CTF_Prefix} There is not a game running right now!"
+
+command /ctfjoin:
+	trigger:
+		if world of player is {@CTF_World_Name} or {@CTF_Nether_Name}:
+			send "{@CTF_Prefix} I don't think that's what you meant. Did you mean §6/ctfinv§7?"
+			stop
+		execute console command "/mvtp %name of player% %{@CTF_Lobby_Name}%"
+
+		if {ctf_tips_enabled::%uuid of player%} is not set:
+			set {ctf_tips_enabled::%uuid of player%} to true
+
+command /ctfhome:
+	trigger:
+		if {ctf_game_running} is false:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+		
+		if world of player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+
+		if {ctf_red_team::*} contains uuid of player:
+			send "{@CTF_Prefix} Your team's flag is located at §6x: %x coordinate of {ctf_red_flag_pos}%§6, y: %y coordinate of {ctf_red_flag_pos}%§6, z: %z coordinate of {ctf_red_flag_pos}%§7." to player
+		else if {ctf_blue_team::*} contains uuid of player:
+			send "{@CTF_Prefix} Your team's flag is located at §6x: %x coordinate of {ctf_blue_flag_pos}%§6, y: %y coordinate of {ctf_blue_flag_pos}%§6, z: %z coordinate of {ctf_blue_flag_pos}%§7." to player
+		else:
+			send "{@CTF_Prefix} You can only use this command while alive!"
+			stop
+
+command /ctfteam:
+	trigger:
+		if {ctf_game_running} is false:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+		
+		if world of player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+
+		if {ctf_red_team::*} contains uuid of player:
+			send "{@CTF_Prefix} The following players are on §cRed§7 team:"
+			loop {ctf_red_team::*}:
+				send " §7- §c%loop-value parsed as player%"
+		else if {ctf_blue_team::*} contains uuid of player:
+			send "{@CTF_Prefix} The following players are on §9Blue§7 team:"
+			loop {ctf_blue_team::*}:
+				send " §7- §9%loop-value parsed as player%"
+		else:
+			send "{@CTF_Prefix} You can only use this command while alive!"
+			stop	
+
+command /ctftp:
+	trigger:
+		if {ctf_game_running} is false:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+		
+		if world of player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+
+		if pvp is disabled in {@CTF_World_Name}:
+			send "{@CTF_Prefix} You can only use this command after PvP starts!"
+			stop			
+
+		set {_pvp_start_time} to {@CTF_Grace_Length} after {ctf_start_time}
+		#send difference between {_pvp_start_time} and now
+		if difference between {_pvp_start_time} and now is greater than 30 seconds:
+			send "{@CTF_Prefix} The opportunity to warp to your flag has expired!"
+			stop
+
+		if {ctf_flag_warp_used::%uuid of player%} is true:
+			send "{@CTF_Prefix} You already did this!"
+			stop
+
+		if {ctf_red_flag_thief} is uuid of player:
+			send "{@CTF_Prefix} You can't use this command while you're carrying a stolen flag. Nice try."
+			stop
+		else if {ctf_blue_flag_thief} is uuid of player:
+			send "{@CTF_Prefix} You can't use this command while you're carrying a stolen flag. Nice try."
+			stop		
+
+		if {ctf_red_team::*} contains uuid of player:
+			teleport player to {ctf_red_flag_pos}
+		else if {ctf_blue_team::*} contains uuid of player:
+			teleport player to {ctf_blue_flag_pos}
+		else:
+			send "{@CTF_Prefix} You can only use this command while alive!"
+			stop
+
+		send "{@CTF_Prefix} You have been teleported to your flag!"
+
+		set {ctf_flag_warp_used::%uuid of player%} to true
+
+command /ctfinv:
+	trigger:
+		if {ctf_game_running} is false:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop
+		
+		if world of player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			stop	
+
+		if {ctf_red_team::*} contains uuid of player:
+			open {ctf_red_team_inv} to player
+		else if {ctf_blue_team::*} contains uuid of player:
+			open {ctf_blue_team_inv} to player
+		else:
+			send "{@CTF_Prefix} You can only use this command while alive!"
+			stop
+
+command /ctftips:
+	trigger:
+		if {ctf_tips_enabled::%uuid of player%} is not true:
+			send "{@CTF_Prefix} Tips are now §aenabled§7!"
+			set {ctf_tips_enabled::%uuid of player%} to true
+		else:
+			send "{@CTF_Prefix} Tips are now §cdisabled§7."
+			set {ctf_tips_enabled::%uuid of player%} to false
+		
+
+on inventory click:
+	if name of top inventory of player is "Team Inventory":
+		if event-item is banner:
+			send "{@CTF_Prefix} You cannot put flags in the team inventory!"
+			cancel event
+			stop
+		#send "hi"
+		if {ctf_red_team::*} contains uuid of player:
+			set {ctf_red_team_inv} to top inventory of player
+		else if {ctf_blue_team::*} contains uuid of player:
+			set {ctf_blue_team_inv} to top inventory of player
+
+on inventory close:
+	if name of top inventory of player is "Team Inventory":
+		#send "hi"
+		if {ctf_red_team::*} contains uuid of player:
+			set {ctf_red_team_inv} to top inventory of player
+		else if {ctf_blue_team::*} contains uuid of player:
+			set {ctf_blue_team_inv} to top inventory of player
+
+on place of lava:
+	if event-player is in {@CTF_World_Name} or {@CTF_Nether_Name}:
+		if pvp is enabled in {@CTF_World_Name}:
+			stop
+		if {ctf_red_team::*} contains uuid of player:
+			loop all players in {@CTF_World_Name}:
+				if {ctf_blue_team::*} contains uuid of loop-player:
+					if distance between event-block and loop-player is less than 5:
+						send "{@CTF_Prefix} You can't place lava near enemy players before PvP starts." to event-player
+						cancel event
+		else if {ctf_blue_team::*} contains uuid of player:
+			loop all players in {@CTF_World_Name}:
+				if {ctf_red_team::*} contains uuid of loop-player:
+					if distance between event-block and loop-player is less than 5:
+						send "{@CTF_Prefix} You can't place lava near enemy players before PvP starts." to event-player
+						cancel event
