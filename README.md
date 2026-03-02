@@ -1,0 +1,1 @@
+This skript is designed for Skript 2.8.4 and SkBee 3.4.3, and depends on Multiverse-Core 4.3.1, Multiverse-Inventories 4.2.3, and Multiverse-NetherPortals 4.2.2.
