@@ -27,6 +27,17 @@
 #                                                                           #
 #---------------------------------------------------------------------------#
 
+
+#                    _                      _   _               __ _             
+#     ___ __ _ _ __ | |_ _   _ _ __ ___    | |_| |__   ___     / _| | __ _  __ _ 
+#    / __/ _` | '_ \| __| | | | '__/ _ \   | __| '_ \ / _ \   | |_| |/ _` |/ _` |
+#   | (_| (_| | |_) | |_| |_| | | |  __/   | |_| | | |  __/   |  _| | (_| | (_| |
+#    \___\__,_| .__/ \__|\__,_|_|  \___|    \__|_| |_|\___|   |_| |_|\__,_|\__, |
+#             |_|                                                          |___/ 
+#
+# 																-- TheNameless44	
+
+
 #----------------------------------------------------------
 # ALIASES
 #----------------------------------------------------------
@@ -61,7 +72,94 @@ options:
 
 	# The game
 	CTF_Perun_Cooldown: 5 seconds
-	CTF_Block_Types_To_Lock: chest and trapped chest and furnace and enchanting table and blast furnace and smoker and anvil
+	CTF_Block_Types_To_Lock: chest, trapped chest, furnace, enchanting table, blast furnace, smoker, anvil, and brewing stand
+
+	CTF_Overworld_size: 350
+	CTF_Nether_size: 60
+
+	# Kits
+	CTF_NUMBER_OF_KITS: 7
+
+	CTF_Kit_0_Enabled: true
+	CTF_Kit_0_Name: "Toolsmith"
+	CTF_Kit_0_Colored_Name: "§7§lToolsmith"
+	CTF_Kit_0_Icon: stone pickaxe named "§7§lToolsmith" with lore "§r§7 - 1x Stone Sword (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Pickaxe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Axe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Shovel (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Hoe (Unbreaking and Efficiency I)" and "" and "§r§7§lCustom Craft:" and "§r§7Philosopher's Pickaxe (Almost broken pickaxe, Fortune II)"
+	CTF_Kit_0_Items: (stone sword of unbreaking 1 and efficiency 1) and (stone pickaxe of unbreaking 1 and efficiency 1) and (stone axe of unbreaking 1 and efficiency 1) and (stone shovel of unbreaking 1 and efficiency 1) and (stone hoe of unbreaking 1 and efficiency 1)
+	CTF_Kit_0_Custom_Craft: diamond pickaxe named "§7Philosopher's Pickaxe" with lore "§r§7Toolsmith Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:fortune"",lvl:2s}],Damage:1558}"
+	CTF_Kit_0_Custom_Craft_Recipe: gold nugget, lapis block, gold nugget, iron ingot, stick, iron ingot, air, stick and air
+	CTF_Kit_0_Custom_Craft_ID: "ctf:toolsmith_craft"
+
+	CTF_Kit_1_Enabled: true
+	CTF_Kit_1_Name: "Hunter"
+	CTF_Kit_1_Colored_Name: "§a§lHunter"
+	CTF_Kit_1_Icon: bow named "§a§lHunter" with lore "§r§a - 4x String" and "§r§a - 8x Feather" and "§r§a - 12x Stick" and "§r§a - 1x Stone Shovel (Unbreaking I, Fortune I)" and "" and "§r§a§lCustom Craft:" and "§r§aCupid's Bow (Bow, Power II and Flame, +20 percent speed)"
+	CTF_Kit_1_Items: 
+	CTF_Kit_1_Custom_Craft: bow named "§aCupid's Bow" with lore "§r§7Hunter Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:flame"",lvl:1s},{id:""minecraft:power"",lvl:2s}]}"
+	CTF_Kit_1_Custom_Craft_Recipe: air and clock and air and blaze powder and bow and blaze powder and air and golden apple and air
+	CTF_Kit_1_Custom_Craft_ID: "ctf:hunter_craft"
+
+	CTF_Kit_2_Enabled: true
+	CTF_Kit_2_Name: "Engineer"
+	CTF_Kit_2_Colored_Name: "§c§lEngineer"
+	CTF_Kit_2_Icon: redstone dust named "§c§lEngineer" with lore "§r§c - 3x Iron Ingot" and "§r§c - 24x Redstone Dust" and "§r§c§l - Spawns with any three of the following:" and "§r§c   - 2x Lever" and "§r§c   - 2x Piston" and "§r§c   - 2x Slimeball" and "§r§c   - 1x Minecraft with TNT" and "§r§c   - 1x Lava Bucket" and "" and "§r§c§lCustom Craft: §cAxe of Perun (Lightning Axe)"
+	CTF_Kit_2_Items: 
+	CTF_Kit_2_Custom_Craft: netherite axe named "§cAxe of Perun" with lore "§r§7Engineer Custom Craft" with nbt compound from "{custom:{IsPerun:1b}}"
+	CTF_Kit_2_Custom_Craft_Recipe: copper block, redstone block, tnt, copper block, diamond axe, air, air, stick, and air
+	CTF_Kit_2_Custom_Craft_ID: "ctf:engineer_craft"
+
+	CTF_Kit_3_Enabled: true
+	CTF_Kit_3_Name: "Enchanter"
+	CTF_Kit_3_Colored_Name: "§9§lEnchanter"
+	CTF_Kit_3_Icon: lapis lazuli named "§9§lEnchanter" with lore "§r§9 - 1x Damaged Anvil" and "§r§9 - 1x Enchanted Book (Sharpness 1)" and "§r§9 - 1x Enchanted Book (Protection 1)" and "§r§9 - 10x Bottle o' Enchanting" and "§r§9 - 4x Obsidian" and "" and "§r§9§lCustom Craft:" and "§9Book of Thoth (Lots of enchantments)"
+	CTF_Kit_3_Items: 
+	CTF_Kit_3_Custom_Craft: enchanted book with name "§9Book of Thoth" with lore "§r§7Enchanter Custom Craft" with nbt compound from "{StoredEnchantments:[{id:""minecraft:protection"",lvl:3s},{id:""minecraft:thorns"",lvl:1s},{id:""minecraft:sharpness"",lvl:3s},{id:""minecraft:fire_aspect"",lvl:1s},{id:""minecraft:power"",lvl:3s},{id:""minecraft:flame"",lvl:1s}]}"
+	CTF_Kit_3_Custom_Craft_Recipe: book, blaze powder, eye of ender, air, air, air, air, air and air
+	CTF_Kit_3_Custom_Craft_ID: "ctf:enchanter_craft"
+
+	CTF_Kit_4_Enabled: true
+	CTF_Kit_4_Name: "Netherologist"
+	CTF_Kit_4_Colored_Name: "§e§lNethorologist"
+	CTF_Kit_4_Icon: brewing stand named "§e§lNetherologist" with lore "§r§e - 12x Obsidian" and "§r§e - 1x Golden Sword (Looting 2)" and "" and "§r§e§lCustom Craft:" and "§r§eMaster's Phial (3 uses, duplicate a potion)"
+	CTF_Kit_4_Items: 
+	CTF_Kit_4_Custom_Craft: 3 glass bottle named "§eMaster's Phial" with lore "§r§7Alchemist Custom Craft"
+	CTF_Kit_4_Custom_Craft_Recipe: redstone dust, redstone dust, glowstone, glowstone, sugar, sugar, gunpowder, gunpowder, and glass bottle
+	CTF_Kit_4_Custom_Craft_ID: "ctf:netherologist_craft"
+
+	CTF_Kit_5_Enabled: true
+	CTF_Kit_5_Name: "Horsetamer"
+	CTF_Kit_5_Colored_Name: "§6§lHorsetamer"
+	CTF_Kit_5_Icon: golden horse armor named "§6§lHorsetamer" with lore "§r§6 - 9x Leather" and "§r§6 - 7x Apple" and "§r§6 - 1x Saddle" and "§r§6 - Spawns with any one of the following:" and "§r§7    - 1x Diamond Horse Armor" and "§r§7    - 1x Saddle" and "§r§7    - 3x Golden Carrot" and "§r§7    - 1x Horse Spawn Egg" and "" and "§r§6§lCustom Craft:" and "§r§6Shadowfax (Tamed Horse with Saddle, maxed stats)"
+	CTF_Kit_5_Items: 
+	CTF_Kit_5_Custom_Craft: horse spawn egg named "§6Shadowfax" with lore "§r§7Horsetamer Custom Craft"
+	CTF_Kit_5_Custom_Craft_Recipe: rotten flesh, saddle, air, bone, bone, bone, bone, air and bone
+	CTF_Kit_5_Custom_Craft_ID: "ctf:horsetamer_craft"
+
+	CTF_Kit_6_Enabled: true
+	CTF_Kit_6_Name: "Ecologist"
+	CTF_Kit_6_Colored_Name: "§2§lEcologist"
+	CTF_Kit_6_Icon: vines named "§2§lEcologist" with lore "§r§2 - 16x Oak Log" and "§r§2 - 1x Wooden Axe (Efficiency 5)" and "§r§2 - 8x Sugar Cane" and "§r§2 - Spawns with any two of the following:" and "§r§7    - 3x Gunpowder" and "§r§7    - 3x Apple" and "§r§7    - 3x Bone" and "§r§7    - 4x Cow Spawn Egg" and "§r§7    - 1x Emerald"  and "§r§7    - 8x Carrot" and "§r§7    - 3x Rotten Flesh" and "" and "§r§2§lCustom Craft: §2Fenrir (Tamed Wolf)"
+	CTF_Kit_6_Items: 
+	CTF_Kit_6_Custom_Craft: player head named "§2Fenrir" with lore "§r§7Ecologist Custom Craft" with nbt compound from "{SkullOwner:{Id:[I;1744107341,533022957,-1537961745,1133912695],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhkNDA4ODQyZTc2YTVhNDU0ZGMxYzdlOWFjNWMxYThhYzNmNGFkMzRkNjk3M2I1Mjc1NDkxZGZmOGM1YzI1MSJ9fX0=""}]}}}"
+	CTF_Kit_6_Custom_Craft_Recipe: bone, leather, bone, leather, rotten flesh, leather, bone, leather, and bone
+	CTF_Kit_6_Custom_Craft_ID: "ctf:ecologist_craft"
+
+	CTF_Kit_7_Enabled: true
+	CTF_Kit_7_Name: "Baker"
+	CTF_Kit_7_Colored_Name: "§d§lBaker"
+	CTF_Kit_7_Icon: cake named "§d§lBaker" with lore "§r§d - 12x Bread" and "§r§d - 1x Golden Apple" and "§r§d - 1x Milk Bucket" and "" and "§r§d§lCustom Craft: §dAmbrosia (Enchanted Golden Apple)"
+	CTF_Kit_7_Items: 
+	CTF_Kit_7_Custom_Craft: notch apple named "§dAmbrosia" with lore "§r§7Baker Custom Craft"
+	CTF_Kit_7_Custom_Craft_Recipe: air, gold block, air, glowstone dust, apple, glowstone dust, air, diamond and air
+	CTF_Kit_7_Custom_Craft_ID: "ctf:baker_craft"
+
+	CTF_Kit_8_Enabled: false
+	#CTF_Kit_8_Name:
+	#CTF_Kit_8_Colored_Name:
+	#CTF_Kit_8_Icon:
+	#CTF_Kit_8_Custom_Craft:
+	#CTF_Kit_8_Custom_Craft_Recipe:
+	#CTF_Kit_8_Custom_Craft_ID:
+
 
 	# DO NOT EDIT
 	CTF_World: world({@CTF_World_Name})
@@ -78,7 +176,7 @@ function in_ctf(p: player) :: boolean:
 	if world of {_p} is {@CTF_World} or {@CTF_Nether}:
 		return true
 	else:
-		return true
+		return false
 
 function contains(list: objects, check: object) :: boolean:
     loop {_list::*}:
@@ -164,7 +262,9 @@ function final_death(p: player):
 				send "{@CTF_Prefix} You've been given the §9Blue§7 flag! Make sure to place it!" to player({ctf_blue_team_captain}) 
 
 function block_is_accessible(p: player, loc: location) :: boolean:
-	if on_red({_p}):
+	if pvp is enabled in {@CTF_World}:
+		return true
+	else if on_red({_p}):
 		if {ctf_blue_owned_blocks::*} contains {_loc}:
 			return false
 		else:
@@ -179,8 +279,8 @@ function block_is_accessible(p: player, loc: location) :: boolean:
 
 command /testingtesting123:
 	trigger:
-		send on_red(player)
-		send on_blue(player)
+		send on_red(player) to player
+		send on_blue(player) to player
 		send has_flag(player) to player
 		send {ctf_respawning_players::*} to player
 
@@ -204,33 +304,61 @@ on load:
 	if ({@CTF_Lobby_Name} parsed as world) is not set:
 		send "{@CTF_Prefix} World '§6%{@CTF_Lobby_Name}%§7' does not exist, creating it." to console
 		execute console command "/mvcreate %{@CTF_Lobby_Name}% normal -t flat -g VoidGenerator"
+		execute console command "/mvgamerule doWeatherCycle false CTF_lobby"
+		execute console command "/mvgamerule doDaylightCycle false CTF_lobby"
 
 	#wipe server crafting recipes
 	#register new shapeless recipe for netherite ingot named "§7Expert's Seal" with lore "§r§7Toolsmith Custom Craft" using iron ingot, iron ingot, iron ingot, iron ingot, gold ingot, gold ingot, gold ingot, gold ingot and air with id "ctf:toolsmith_craft"
-	register new shaped recipe for diamond pickaxe named "§7Philosopher's Pickaxe" with lore "§r§7Toolsmith Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:fortune"",lvl:2s}],Damage:1558}" using gold nugget, lapis block, gold nugget, iron ingot, stick, iron ingot, air, stick and air with id "ctf:toolsmith_craft" 
+	clear {ctf::kits::*}
+	
+	parse if {@CTF_Kit_0_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_0_Custom_Craft} using {@CTF_Kit_0_Custom_Craft_Recipe} with id {@CTF_Kit_0_Custom_Craft_ID}
+		set {ctf::kits::0} to {@CTF_Kit_0_Name}
+		set {ctf::kits::0::item} to {@CTF_Kit_0_Icon}
 
-	#set {_meat} to material choice of raw pork, raw beef, rotten flesh, raw chicken, raw rabbit
-	#register new shaped recipe for player head named "§aFenrir" with lore "§r§7Hunter Custom Craft" with nbt nbt compound from "{SkullOwner:{Id:[I;1744107341,533022957,-1537961745,1133912695],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhkNDA4ODQyZTc2YTVhNDU0ZGMxYzdlOWFjNWMxYThhYzNmNGFkMzRkNjk3M2I1Mjc1NDkxZGZmOGM1YzI1MSJ9fX0=""}]}}}" using bone, leather, bone, leather, rotten flesh, leather, bone, leather, and bone with id "ctf:hunter_craft"
-	register new shaped recipe for bow named "§aCupid's Bow" with lore "§r§7Hunter Custom Craft" with nbt compound from "{Enchantments:[{id:""minecraft:flame"",lvl:1s},{id:""minecraft:power"",lvl:2s}]}" using air and clock and air and blaze powder and bow and blaze powder and air and golden apple and air with id "ctf:hunter_craft"
+	parse if {@CTF_Kit_1_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_1_Custom_Craft} using {@CTF_Kit_1_Custom_Craft_Recipe} with id {@CTF_Kit_1_Custom_Craft_ID}
+		set {ctf::kits::1} to {@CTF_Kit_1_Name}
+		set {ctf::kits::1::item} to {@CTF_Kit_1_Icon}
 
-	register new shaped recipe for netherite axe named "§cAxe of Perun" with lore "§r§7Engineer Custom Craft" with nbt compound from "{custom:{IsPerun:1b}}" using copper block, redstone block, tnt, copper block, diamond axe, air, air, stick, and air with id "ctf:engineer_craft"
+	parse if {@CTF_Kit_2_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_2_Custom_Craft} using {@CTF_Kit_2_Custom_Craft_Recipe} with id {@CTF_Kit_2_Custom_Craft_ID}
+		set {ctf::kits::2} to {@CTF_Kit_2_Name}
+		set {ctf::kits::2::item} to {@CTF_Kit_2_Icon}
 
-	register new shapeless recipe for enchanted book with name "§9Book of Thoth" with lore "§r§7Enchanter Custom Craft" with nbt compound from "{StoredEnchantments:[{id:""minecraft:protection"",lvl:3s},{id:""minecraft:thorns"",lvl:1s},{id:""minecraft:sharpness"",lvl:3s},{id:""minecraft:fire_aspect"",lvl:1s},{id:""minecraft:power"",lvl:3s},{id:""minecraft:flame"",lvl:1s}]}" using book, blaze powder, eye of ender, air, air, air, air, air and air with id "ctf:thoth_craft"
-	#register new shaped recipe for enchanting table with name "§9Light Enchanting Table" with lore "§r§7Enchanter Custom Craft" using I DON'T KNOW 
+	parse if {@CTF_Kit_3_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_3_Custom_Craft} using {@CTF_Kit_3_Custom_Craft_Recipe} with id {@CTF_Kit_3_Custom_Craft_ID}
+		set {ctf::kits::3} to {@CTF_Kit_3_Name}
+		set {ctf::kits::3::item} to {@CTF_Kit_3_Icon}
 
-	register new shapeless recipe for 3 glass bottle named "§eMaster's Phial" with lore "§r§7Alchemist Custom Craft" using redstone dust, redstone dust, glowstone, glowstone, sugar, sugar, gunpowder, gunpowder, and glass bottle with id "ctf:netherologist_craft"
+	parse if {@CTF_Kit_4_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_4_Custom_Craft} using {@CTF_Kit_4_Custom_Craft_Recipe} with id {@CTF_Kit_4_Custom_Craft_ID}
+		set {ctf::kits::4} to {@CTF_Kit_4_Name}
+		set {ctf::kits::4::item} to {@CTF_Kit_4_Icon}	
 
-	#register new shaped recipe for diamond pickaxe of fortune 3 with damage 1558 named "§bPhilosopher's Pickaxe" with lore "§r§7X-Rayer Custom Craft" using lapis block, gold ingot, lapis block, gold ingot, stick, gold ingot, air, stick, air with id "ctf:xrayer_craft"
-	register new shaped recipe for horse spawn egg named "§6Shadowfax" with lore "§r§7Horsetamer Custom Craft" using rotten flesh, saddle, air, bone, bone, bone, bone, air and bone with id "ctf:horsetamer_craft"
+	parse if {@CTF_Kit_5_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_5_Custom_Craft} using {@CTF_Kit_5_Custom_Craft_Recipe} with id {@CTF_Kit_5_Custom_Craft_ID}
+		set {ctf::kits::5} to {@CTF_Kit_5_Name}
+		set {ctf::kits::5::item} to {@CTF_Kit_5_Icon}
 
-	#register new shaped recipe for 3 golden carrot named "§2Cornucopia" with lore "§r§7Ecologist Custom Craft" using carrot, carrot, carrot, carrot, golden apple, carrot, carrot, carrot, and carrot with id "ctf:ecologist_craft"
-	register new shaped recipe for player head named "§2Fenrir" with lore "§r§7Ecologist Custom Craft" with nbt compound from "{SkullOwner:{Id:[I;1744107341,533022957,-1537961745,1133912695],Properties:{textures:[{Value:""eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhkNDA4ODQyZTc2YTVhNDU0ZGMxYzdlOWFjNWMxYThhYzNmNGFkMzRkNjk3M2I1Mjc1NDkxZGZmOGM1YzI1MSJ9fX0=""}]}}}" using bone, leather, bone, leather, rotten flesh, leather, bone, leather, and bone with id "ctf:ecologist_craft"
+	parse if {@CTF_Kit_6_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_6_Custom_Craft} using {@CTF_Kit_6_Custom_Craft_Recipe} with id {@CTF_Kit_6_Custom_Craft_ID}
+		set {ctf::kits::6} to {@CTF_Kit_6_Name}
+		set {ctf::kits::6::item} to {@CTF_Kit_6_Icon}
 
-	register new shaped recipe for notch apple named "§dAmbrosia" with lore "§r§7Baker Custom Craft" using air, gold block, air, glowstone dust, apple, glowstone dust, air, diamond and air with id "ctf:baker_craft" 
+	parse if {@CTF_Kit_7_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_7_Custom_Craft} using {@CTF_Kit_7_Custom_Craft_Recipe} with id {@CTF_Kit_7_Custom_Craft_ID}
+		set {ctf::kits::7} to {@CTF_Kit_7_Name}
+		set {ctf::kits::7::item} to {@CTF_Kit_7_Icon}
+
+	parse if {@CTF_Kit_8_Enabled} is true:
+		register new shaped recipe for {@CTF_Kit_8_Custom_Craft} using {@CTF_Kit_8_Custom_Craft_Recipe} with id {@CTF_Kit_8_Custom_Craft_ID}
+		set {ctf::kits::8} to {@CTF_Kit_8_Name}
+		set {ctf::kits::8::item} to {@CTF_Kit_8_Icon}
 
 	register new shaped recipe for chest named "§dChest of Fate" with lore "§r§7Universal Custom Craft" with nbt compound from "{custom:{IsFate:1b}}" using air, rotten flesh, air, rotten flesh, chest, rotten flesh, rotten flesh, bone block and rotten flesh with id "ctf:fate_craft"
 
-	set {ctf_map_seeds::*} to -7425083384785797603 and -2853115369393424940 and 3465064830969400913 and 4706744060028891041 and 5143298294600212457 and -4393390708055947667 and 4446402412625611613 and -5723831693301730861 and -3104287522933369767 and -2853115369393424940 and 733823915755624381 and 5252535281280922172
+	set {ctf_map_seeds::*} to -7425083384785797603 and -2853115369393424940 and 3465064830969400913 and 4706744060028891041 and 5143298294600212457 and -4393390708055947667 and 4446402412625611613 and -5723831693301730861 and -3104287522933369767 and -2853115369393424940 and 733823915755624381 and 5252535281280922172 and 5610935128103456322
 	# no: 7669538021748505909
 	# maybe: -39683802686620769
 	# no: -559705863564020012
@@ -247,8 +375,7 @@ on load:
 
 	set {ctf_tip_counter} to 1
 
-
-#----------------------------------------------------------
+#----------------------------------`------------------------
 # THE LOBBY
 #----------------------------------------------------------
 
@@ -284,14 +411,9 @@ on teleport:
 			set {ctf_selected_kit::%uuid of player%} to 1
 
 		clear player's inventory
-		set slot 1 of player to stone pickaxe named "§7§lToolsmith" with lore "§r§7 - 1x Stone Sword (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Pickaxe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Axe (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Shovel (Unbreaking and Efficiency I)" and "§r§7 - 1x Stone Hoe (Unbreaking and Efficiency I)" and "" and "§r§7§lCustom Craft:" and "§r§7Philosopher's Pickaxe (Almost broken pickaxe, Fortune II)"
-		set slot 2 of player to bow named "§a§lHunter" with lore "§r§a - 4x String" and "§r§a - 8x Feather" and "§r§a - 12x Stick" and "§r§a - 1x Stone Shovel (Unbreaking I, Fortune I)" and "" and "§r§a§lCustom Craft:" and "§r§aCupid's Bow (Bow, Power II and Flame, +20%% speed)"
-		set slot 3 of player to redstone dust named "§c§lEngineer" with lore "§r§c - 3x Iron Ingot" and "§r§c - 24x Redstone Dust" and "§r§c§l - Spawns with any three of the following:" and "§r§c   - 2x Lever" and "§r§c   - 2x Piston" and "§r§c   - 2x Slimeball" and "§r§c   - 1x Minecraft with TNT" and "§r§c   - 1x Lava Bucket" and "" and "§r§c§lCustom Craft: §cAxe of Perun (Lightning Axe)"
-		set slot 4 of player to lapis lazuli named "§9§lEnchanter" with lore "§r§9 - 1x Damaged Anvil" and "§r§9 - 1x Enchanted Book (Sharpness 1)" and "§r§9 - 1x Enchanted Book (Protection 1)" and "§r§9 - 10x Bottle o' Enchanting" and "§r§9 - 4x Obsidian" and "" and "§r§9§lCustom Craft:" and "§9Book of Thoth (Lots of enchantments)"
-		set slot 5 of player to brewing stand named "§e§lNetherologist" with lore "§r§e - 12x Obsidian" and "§r§e - 1x Golden Sword (Looting 2)" and "" and "§r§e§lCustom Craft:" and "§r§eMaster's Phial (3 uses, duplicate a potion)"
-		set slot 6 of player to diamond horse armor named "§6§lHorsetamer" with lore "§r§6 - 9x Leather" and "§r§6 - 7x Apple" and "§r§6 - 1x Saddle" and "§r§6 - Spawns with any one of the following:" and "§r§7    - 1x Diamond Horse Armor" and "§r§7    - 1x Saddle" and "§r§7    - 3x Golden Carrot" and "§r§7    - 1x Horse Spawn Egg" and "" and "§r§6§lCustom Craft:" and "§r§6Shadowfax (Tamed Horse with Saddle, maxed stats)"
-		set slot 7 of player to vines named "§2§lEcologist" with lore "§r§2 - 16x Oak Log" and "§r§2 - 1x Wooden Axe (Efficiency 5)" and "§r§2 - 8x Sugar Cane" and "§r§2 - Spawns with any two of the following:" and "§r§7    - 3x Gunpowder" and "§r§7    - 3x Apple" and "§r§7    - 3x Bone" and "§r§7    - 4x Cow Spawn Egg" and "§r§7    - 1x Emerald"  and "§r§7    - 8x Carrot" and "§r§7    - 3x Rotten Flesh" and "" and "§r§2§lCustom Craft: §2Fenrir (Tamed Wolf)"
-		set slot 8 of player to cake named "§d§lBaker" with lore "§r§d - 12x Bread" and "§r§d - 1x Golden Apple" and "§r§d - 1x Milk Bucket" and "" and "§r§d§lCustom Craft: §dAmbrosia (Enchanted Golden Apple)"
+
+		loop integers between 0 and size of {ctf::kits::*}:
+			set slot loop-number of player to {ctf::kits::%loop-number%::item}
 
 every 5 seconds in {@CTF_Lobby_Name}:
 	loop all players in {@CTF_Lobby_Name}:
@@ -310,37 +432,18 @@ on damage:
 				else:
 					send "§cThe Axe of Perun is on cooldown! You need to wait %difference between (difference between {ctf_perun_last_use::%uuid of attacker%} and now) and {@CTF_Perun_Cooldown}% to use it again!" to attacker
 
+function display_kit_action_bar_for(p: player):
+	send action bar "§7You have the %{ctf::kits::%{ctf_selected_kit::%uuid of {_p}%}%}%§7 kit selected." to {_p}
+
 every 2 seconds:
 	loop all players in {@CTF_Lobby_Name}:
-		send action bar "§7You have the %name of slot {ctf_selected_kit::%uuid of loop-player%} of loop-player%§7 kit selected." to loop-player
+		display_kit_action_bar_for(loop-player)
 
 on right click:
 	if player is in {@CTF_Lobby_Name}:
-		if tool of player is stone pickaxe:
-			set {ctf_selected_kit::%uuid of player%} to 1
-
-		if tool of player is bow:
-			set {ctf_selected_kit::%uuid of player%} to 2
-
-		if tool of player is redstone dust:
-			set {ctf_selected_kit::%uuid of player%} to 3
-
-		if tool of player is lapis lazuli:
-			set {ctf_selected_kit::%uuid of player%} to 4
-
-		if tool of player is brewing stand:
-			set {ctf_selected_kit::%uuid of player%} to 5
-
-		if tool of player is diamond horse armor:
-			set {ctf_selected_kit::%uuid of player%} to 6
-
-		if tool of player is vines:
-			set {ctf_selected_kit::%uuid of player%} to 7
-		
-		if tool of player is cake:
-			set {ctf_selected_kit::%uuid of player%} to 8
-
-		send action bar "§7You have the %name of slot {ctf_selected_kit::%uuid of player%} of player%§7 kit selected." to player
+		if index of hotbar slot of event-player <= {@CTF_NUMBER_OF_KITS}:
+			set {ctf_selected_kit::%uuid of player%} to index of hotbar slot of event-player
+			display_kit_action_bar_for(event-player)
 
 every 15 seconds:
 	loop all players in {@CTF_Lobby_Name}:
@@ -353,15 +456,23 @@ every 15 seconds:
 		set {ctf_tip_counter} to 1
 
 
+command /ctfredteam [<player>]:
+	trigger:
+		add uuid of arg 1 to {ctf_red_team::*}
+
+command /givemethevariable <text>:
+	trigger:
+		send "Value of §6{%arg 1%}§r = §b%{%arg 1%}%" to player
+
 #----------------------------------------------------------
-# THE GAME
+# THE GAME MECHANICS
 #----------------------------------------------------------
 
-# Prevent ender pearl use with flags
 on shoot:
 	shooter is player
 
 	if in_ctf(shooter):
+		# Prevent ender pearl use when carrying a flag
 		if event-projectile is ender pearl:
 			if uuid of shooter is {ctf_blue_flag_thief}:
 				cancel event
@@ -369,6 +480,11 @@ on shoot:
 			else if uuid of shooter is {ctf_red_flag_thief}:
 				cancel event
 				send "{@CTF_Prefix} You can't use ender pearls while carrying a flag." to shooter
+		
+		# Make eyes of ender go to the opponent's flag
+		# TODO: add this as a tip
+		if event-projectile is eye of ender:
+			send "§6This feature is still in development." to shooter #TODO
 
 # Lock certain blocks to their teams
 on place:
@@ -413,6 +529,7 @@ on mine of ore:
 						drop loop-item at location of event-block
 
 on explosion:
+	# TODO: don't do this outside of CTF worlds
 	cancel event
 	create a fake explosion at event-location
 	loop exploded blocks:
@@ -436,49 +553,49 @@ every 5 ticks:
 			if {_firstline} contains colored "Toolsmith Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 1:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 0:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Toolsmith kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Hunter Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 2:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 1:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Hunter kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Engineer Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 3:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 2:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Engineer kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Enchanter Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 4:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 3:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Enchanter kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Alchemist Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 5:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 4:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Alchemist kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Horsetamer Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 6:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 5:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Horsetamer kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
 			else if {_firstline} contains "Ecologist Custom Craft":
 				if world of loop-player is not {@CTF_World_Name} or {@CTF_Nether_Name}:
 					set slot 0 of top inventory of loop-player to air
-				else if {ctf_selected_kit::%uuid of loop-player%} is not 7:
+				else if {ctf_selected_kit::%uuid of loop-player%} is not 6:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lThis item is only available to the Ecologist kit!"
 				else if {ctf_used_kit_craft::%uuid of loop-player%} is true:
 					set slot 0 of top inventory of loop-player to barrier named "§c§lYou already used your kit craft!"
@@ -505,11 +622,11 @@ on inventory click:
 		if event-slot is barrier:
 			cancel event
 		
-every 30 seconds:
+every 5 seconds:
 	if {ctf_game_running} is true:
 		if number of players in {@CTF_Nether_Name} is not 0:
 			#send "hi" to all players
-			chance of 12.5%:
+			chance of 10%:
 				#send "hello" to all players
 				set {_x} to random integer between -30 and 30
 				set {_z} to random integer between -30 and 30
@@ -525,6 +642,7 @@ every 30 seconds:
 						if block above loop-block is air:
 							if block below loop-block is not air:
 								spawn blaze at location of loop-block
+								stop
 
 
 command /ctfshout:
@@ -535,7 +653,7 @@ command /ctfshout:
 			else:
 				send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
 		else:
-				send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
+			send "{@CTF_Prefix} You can only use this command while in a game of CTF!"
 
 on chat:
 	if {ctf_game_running} is true:
@@ -648,24 +766,28 @@ on place of banner:
 		send "{@CTF_Prefix} You can't place flags in the nether!" to event-player
 		cancel event		
 
-on mine of netherrack:
-	wait 1 tick
-	chance of 3.5%:
-		send "{@CTF_Prefix} Some items were buried in the netherrack!" to event-player
-		play sound "entity.firework_rocket.blast" for player
 		
-		chance of 10%:
-			drop ancient debris at event-location
+on mine:
+	if world of event-block is {@CTF_Nether_Name}:
+		if {ctf_infused_nether_blocks::*} contains location of event-block:
+			send "{@CTF_Prefix} Some items were buried in the netherrack!" to event-player
+			play sound "entity.firework_rocket.blast" for player
+			
+			chance of 10%:
+				drop ancient debris at event-location
 
-		set {_items::*} to torch and coal and gold ingot and arrow and apple and nether wart and 2 nether wart and furnace and iron ingot and bottle o' enchanting and netherrack and torch and coal and gold ingot and arrow and apple and furnace and iron ingot and bottle o' enchanting and blaze powder and gunpowder and magma cream and ender pearl and netherite upgrade template
-		
-		chance of 30%:
-			add diamond to {_items::*}
-		
-		loop (random integer between 5 and 8) times:
-			drop random element out of {_items::*} at event-location
-			remove {_slot} from {_slots::*}
-		
+			set {_items::*} to torch and coal and gold ingot and arrow and apple and nether wart and 2 nether wart and furnace and iron ingot and bottle o' enchanting and netherrack and torch and coal and gold ingot and arrow and apple and furnace and iron ingot and bottle o' enchanting and blaze powder and gunpowder and magma cream and ender pearl and netherite upgrade template
+			
+			chance of 30%:
+				add diamond to {_items::*}
+
+			wait 1 tick
+			
+			loop (random integer between 5 and 8) times:
+				drop random element out of {_items::*} at event-location
+			
+			remove location of event-block from {ctf_infused_nether_blocks::*}
+
 
 on place of chest:
 	#send "hi"
@@ -809,15 +931,21 @@ on break:
 			cancel event
 			send "{@CTF_Prefix} You cannot break the block below a flag." to event-player
 
+# Flag moving and theft
 on break of banner:
 	if event-world is {@CTF_World_Name}:
+		# Flags can only be broken by players.
 		if player is not set:
 			cancel event
-		broadcast player
+		
+		#broadcast player
+
+		# Spectators can't break flags.
 		if {ctf_blue_team::*} does not contain uuid of player:
 			if {ctf_red_team::*} does not contain uuid of player:
 				send "{@CTF_Prefix} I don't know how you were able to do this, but you aren't allowed to." to event-player
 				cancel event
+				
 		if event-block is blue banner:
 			if {ctf_blue_team::*} contains uuid of player:
 				if uuid of player is {ctf_blue_team_captain}:
@@ -840,10 +968,18 @@ on break of banner:
 			else:
 				if pvp is enabled in {@CTF_World_Name}:
 					send "{@CTF_Prefix} §6%name of player%§7 stole the §9Blue§7 flag!" to all players in {@CTF_World_Name}
+					
 					give player drops of block
 					set {ctf_blue_flag_thief} to uuid of player
 					set {ctf_blue_flag_stolen} to true
+
+					# Make the player glow
+					set glowing of player to true 
+
 					clear drops
+
+					set block at location of event-block to {@CTF_Stolen_Flag}
+
 					stop
 				send "{@CTF_Prefix} You can't steal flags before PvP." to event-player
 				cancel event
@@ -870,10 +1006,18 @@ on break of banner:
 			else:
 				if pvp is enabled in {@CTF_World_Name}:
 					send "{@CTF_Prefix} §6%name of player%§7 stole the §cRed§7 flag!" to all players in {@CTF_World_Name}
+
 					give player drops of block
 					set {ctf_red_flag_thief} to uuid of player
 					set {ctf_red_flag_stolen} to true
+
+					# Make the player glow
+					set glowing of player to true 
+
 					cancel drops
+
+					set block at location of event-block to {@CTF_Stolen_Flag}
+
 					stop
 				send "{@CTF_Prefix} You can't steal flags before PvP." to event-player
 				cancel event
@@ -904,13 +1048,6 @@ on leave:
 	execute console command "/mvtp %name of player% world"
 	wait 1 tick
 	if world of player is {@CTF_World_Name}:
-		if {ctf_blue_team::*} contains uuid of player:
-			remove uuid of player from {ctf_blue_team::*}
-		else if {ctf_red_team::*} contains uuid of player:
-			remove uuid of player from {ctf_red_team::*}
-
-		send number of players in {@CTF_World_Name} to console
-
 		if size of all players in {@CTF_World_Name} is 0:
 			stop()
 
@@ -1016,43 +1153,43 @@ on respawn:
 			send "{@CTF_Prefix} You died, and your flag was either unplaced or captured, so you died permanently."
 			set gamemode of player to spectator
 
-	if size of {ctf_red_team::*} is 0:
-		send "{@CTF_Prefix} §9Blue §7team has won!" to all players in {@CTF_World_Name}
-		loop {ctf_blue_team::*}:
-			send title "§6VICTORY!" to loop-value parsed as player
+		if size of {ctf_red_team::*} is 0:
+			send "{@CTF_Prefix} §9Blue §7team has won!" to all players in {@CTF_World_Name}
+			loop {ctf_blue_team::*}:
+				send title "§6VICTORY!" to loop-value parsed as player
 
-		loop {ctf_red_team::*}:
-			send title "§cGAME OVER!" to loop-value parsed as player
-		
-		loop all players in {@CTF_World_Name}:
-			play sound "item.goat_horn.sound0" for loop-player
-		
-		wait 1 second
+			loop {ctf_red_team::*}:
+				send title "§cGAME OVER!" to loop-value parsed as player
+			
+			loop all players in {@CTF_World_Name}:
+				play sound "item.goat_horn.sound0" for loop-player
+			
+			wait 1 second
 
-		loop all players in {@CTF_World_Name}:
-			play sound "item.goat_horn.sound1" for loop-player
-		wait 6 seconds
-		stop()
-		stop
+			loop all players in {@CTF_World_Name}:
+				play sound "item.goat_horn.sound1" for loop-player
+			wait 6 seconds
+			stop()
+			stop
 
-	if size of {ctf_blue_team::*} is 0:
-		send "{@CTF_Prefix} §cRed §7team has won!" to all players in {@CTF_World_Name}
-		loop {ctf_red_team::*}:
-			send title "§6VICTORY!" to loop-value parsed as player
+		if size of {ctf_blue_team::*} is 0:
+			send "{@CTF_Prefix} §cRed §7team has won!" to all players in {@CTF_World_Name}
+			loop {ctf_red_team::*}:
+				send title "§6VICTORY!" to loop-value parsed as player
 
-		loop {ctf_blue_team::*}:
-			send title "§cGAME OVER!" to loop-value parsed as player
-		
-		loop all players in {@CTF_World_Name}:
-			play sound "item.goat_horn.sound0" for all players in {@CTF_World_Name}
-		
-		wait 1 second
+			loop {ctf_blue_team::*}:
+				send title "§cGAME OVER!" to loop-value parsed as player
+			
+			loop all players in {@CTF_World_Name}:
+				play sound "item.goat_horn.sound0" for all players in {@CTF_World_Name}
+			
+			wait 1 second
 
-		loop all players in {@CTF_World_Name}:
-			play sound "item.goat_horn.sound1" for all players in {@CTF_World_Name}
-		wait 6 seconds
-		stop()
-		stop
+			loop all players in {@CTF_World_Name}:
+				play sound "item.goat_horn.sound1" for all players in {@CTF_World_Name}
+			wait 6 seconds
+			stop()
+			stop
 
 function start(p: player):
 	if {ctf_game_running} is true:
@@ -1067,15 +1204,10 @@ function start(p: player):
 		send "{@CTF_Prefix} You can't start a game unless you are in the lobby!" to {_p}
 		stop		
 
-	clear {ctf_blue_team::*}
-	clear {ctf_red_team::*}
-
-	clear {ctf_blue_owned_blocks::*}
-	clear {ctf_red_owned_blocks::*}
-
 	send title "§7Please wait..." with subtitle "&8This will lag." to all players in {@CTF_Lobby_Name} for 1002 ticks
 	broadcast "{@CTF_Prefix} Generating map..."
 
+	# Clean up existing worlds
 	execute console command "/mvdelete %{@CTF_World_Name}%"
 	wait 1 tick
 	execute console command "/mvconfirm"
@@ -1086,25 +1218,37 @@ function start(p: player):
 	execute console command "/mvconfirm"
 	wait 2 ticks
 
-	if chance of 20%:
-		execute console command "/mvcreate %{@CTF_World_Name}% normal -s %random element out of {ctf_map_seeds::*}%"
-	else:
-		execute console command "/mvcreate %{@CTF_World_Name}% normal"
+	# Create the main overworld
+	execute console command "/mvcreate %{@CTF_World_Name}% normal"
 	wait 2 ticks
 
+	# Create the nether
 	broadcast "{@CTF_Prefix} Generating Nether..."
 	execute console command "/mvcreate %{@CTF_Nether_Name}% nether"
 
 	wait 2 ticks
 
-	execute console command "/execute in minecraft:ctf_nether run forceload add -40 40"
+	clear {ctf_infused_nether_blocks::*}
+
+	# Select blocks for drops
+	set {_half_nether_size} to {@CTF_Nether_Size} / 2
+	set {_minus_half_nether_size} to -{@CTF_Nether_Size} / 2
+	loop 100 times:
+		set {_x} to random integer between {_minus_half_nether_size} and {_half_nether_size}
+		set {_y} to random integer between 0 and 127
+		set {_z} to random integer between {_minus_half_nether_size} and {_half_nether_size}
+
+		if block at location({_x}, {_y}, {_z}, {@CTF_Nether_Name}) is netherrack: # TODO: other blocks can be infused too
+			add location({_x}, {_y}, {_z}, {@CTF_Nether_Name}) to {ctf_infused_nether_blocks::*}
+
+	#execute console command "/execute in minecraft:ctf_nether run forceload add -40 40"
 
 	wait 10 ticks
 
-	if chance of 50%:
-		execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:fortress ~ ~ ~"
-	else:
-		execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:bastion_remnant ~ ~ ~"
+	#if chance of 50%:
+	#	execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:fortress ~ ~ ~"
+	#else:
+	#	execute console command "/execute in minecraft:ctf_nether positioned 0 128 0 run place structure minecraft:bastion_remnant ~ ~ ~"
 	
 	#execute console command "/mvcreate %{@CTF_World_Name}% normal -s %random element out of {ctf_map_seeds::*}%"
 	
@@ -1166,20 +1310,20 @@ function start(p: player):
 		undiscover_recipes(loop-player)
 
 		#send "thingymabob" to loop-player
-		if {ctf_selected_kit::%uuid of loop-player%} is 1:
+		if {ctf_selected_kit::%uuid of loop-player%} is 0:
 			give loop-player stone sword of unbreaking 1 and efficiency 1
 			give loop-player stone pickaxe of unbreaking 1 and efficiency 1
 			give loop-player stone axe of unbreaking 1 and efficiency 1
 			give loop-player stone shovel of unbreaking 1 and efficiency 1
 			give loop-player stone hoe of unbreaking 1 and efficiency 1
 			discover custom recipe "ctf:toolsmith_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 2:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 1:
 			give loop-player 4 string
 			give loop-player 8 feather
 			give loop-player 12 stick
 			give loop-player stone shovel of unbreaking 1 and fortune 1
 			discover custom recipe "ctf:hunter_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 3:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 2:
 			give loop-player 3 iron ingot
 			give loop-player 24 redstone dust
 			
@@ -1191,18 +1335,18 @@ function start(p: player):
 				remove {_item} from {_possible_items::*}
 
 			discover custom recipe "ctf:engineer_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 4:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 3:
 			give loop-player damaged anvil
 			give loop-player enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:""minecraft:sharpness"",lvl:1b}]}"
 			give loop-player enchanted book with nbt nbt compound from "{StoredEnchantments:[{id:""minecraft:protection"",lvl:1b}]}"
 			give loop-player 10 bottle o' enchanting
 			give loop-player 4 obsidian
 			discover custom recipe "ctf:enchanter_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 5:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 4:
 			give loop-player 12 obsidian
 			give loop-player golden sword of looting 2
 			discover custom recipe "ctf:netherologist_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 6:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 5:
 			#set slot 6 of player to diamond horse armor named "§6§lHorsetamer" with lore "§r§6 - 9x Leather" and "§r§6 - 7x Apple" and "§r§6 - 1x Saddle" and "§r§6 - Spawns with any one of the following:" and "§r§7    - 1x Diamond Horse Armor" and "§r§7    - 1x Saddle" and "§r§7    - 3x Golden Carrot" and "§r§7    - 1x Horse Spawn Egg" and "" and "§r§6§lCustom Craft:" and "§r§6Shadowfax (Tamed Horse with Saddle, Max Speed, Jump, and Health)"
 			give loop-player 9 leather
 			give loop-player 7 apple
@@ -1213,7 +1357,7 @@ function start(p: player):
 			#send random element out of {_possible_items::*} to loop-player
 			give loop-player random element out of {_possible_items::*}
 			discover custom recipe "ctf:horsetamer_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 7:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 6:
 			give loop-player 16 oak log
 			give loop-player wooden axe of efficiency 5
 			give loop-player 8 sugar cane
@@ -1227,7 +1371,7 @@ function start(p: player):
 			give loop-player {_item}
 			remove {_item} from {_possible_items::*}
 			discover custom recipe "ctf:ecologist_craft" for loop-player
-		else if {ctf_selected_kit::%uuid of loop-player%} is 8:
+		else if {ctf_selected_kit::%uuid of loop-player%} is 7:
 			give loop-player 12 bread
 			give loop-player 1 golden apple
 			give loop-player 1 milk bucket
@@ -1237,34 +1381,53 @@ function start(p: player):
 		#send amount of items in inventory of loop-player to loop-player
 
 	loop all players in {@CTF_World_Name}:
-		heal loop-player by 20 hearts
-		set food level of loop-player to 20
-		remove all potions from loop-player
-		execute console command "/effect clear %loop-player%"
 		set {ctf_perun_last_use::%uuid of loop-player%} to now
-		set level of loop-player to 0
-		set level progress of loop-player to 0
 		set {ctf_flag_warp_used::%uuid of loop-player%} to false
 
-	set {_a} to 1
+	# Set up teams
+	clear {ctf_blue_team::*}
+	clear {ctf_blue_team_alive::*}
+	clear {ctf_red_team::*}
+	clear {ctf_red_team_alive::*}
+
+	clear {ctf_blue_owned_blocks::*}
+	clear {ctf_red_owned_blocks::*}
+
+	execute console command "/team remove ctf.red"
+	execute console command "/team remove ctf.blue"
+
+	wait 1 tick
+
+	execute console command "/team add ctf.red"
+	execute console command "/team add ctf.blue"
+
+	wait 1 tick
+
+	execute console command "/
 
 	clear {_uuids::*}
 	loop all players in {@CTF_World_Name}:
 		add uuid of loop-player to {_uuids::*}
 	
-	set {_shuffled_uuids::*} to shuffled {_uuids::*}
+	clear {_shuffled_uuids::*}
+	loop size of {_uuids::*} times:
+		set {_uuid} to random element out of {_uuids::*}
+		add {_uuid} to {_shuffled_uuids::*}
+		remove {_uuid} from {_uuids::*}
 
-	broadcast {_shuffled_uuids::*}
+	set {_a} to 1
 
 	loop {_shuffled_uuids::*}:
 		set {_p} to player(loop-value)
 		if {_a} mod 2 = 1:
 			set {prefixes::%loop-value%::*} to "§c§l[M]§c"
 			add loop-value to {ctf_red_team::*}
+			add loop-value to {ctf_red_team_alive::*}
 			send title "§cYou are on Red..." to {_p} for 3 seconds
 		if {_a} mod 2 = 0:
 			set {prefixes::%loop-value%::*} to "§9§l[M]§9"
 			add loop-value to {ctf_blue_team::*}
+			add loop-value to {ctf_blue_team_alive::*}
 			send title "§9You are on Blue..." to {_p} for 3 seconds
 		send subtitle "§7and are NOT the team captain." to {_p} for 3 seconds
 		add 1 to {_a}
@@ -1323,10 +1486,11 @@ function start(p: player):
 	execute console command "/mvgamerule doImmediateRespawn true %{@CTF_World_Name}%"
 	execute console command "/mvgamerule doImmediateRespawn true %{@CTF_Nether_Name}%"
 	
-	execute console command "/execute in minecraft:%{@CTF_World_Name}% run worldborder set 350"
+	execute console command "/execute in minecraft:%{@CTF_World_Name}% run worldborder set %{@CTF_Overworld_size}%"
 	wait 2 ticks
-	execute console command "/execute in minecraft:%{@CTF_Nether_Name}% run worldborder set 60"
+	execute console command "/execute in minecraft:%{@CTF_Nether_Name}% run worldborder set %{@CTF_Nether_size}%"
 
+	# Set up the Multiverse-Inventories shares
 	execute console command "/mvinv removeworld %{@CTF_World_Name}% %{@CTF_World_Name}%"
 	wait 1 tick
 	execute console command "/mvinv removeworld %{@CTF_Nether_Name}% %{@CTF_World_Name}%"
@@ -1337,13 +1501,10 @@ function start(p: player):
 	wait 1 tick
 	execute console command "/mvinv addshares inventory %{@CTF_World_Name}%"
 	wait 1 tick
-	execute console command "/mvinv addshares health %{@CTF_World_Name}%"
+	execute console command "/mvinv addshares stats %{@CTF_World_Name}%"
 	wait 1 tick
-	execute console command "/mvinv addshares hunger %{@CTF_World_Name}%"
-	wait 1 tick
-	execute console command "/mvinv addshares potion %{@CTF_World_Name}%"
-	wait 1 tick
-	execute console command "/mvinv addshares xp %{@CTF_World_Name}%"
+	execute console command "/mvinv addshares advancement %{@CTF_World_Name}%"
+
 
 function stop():
 	set {ctf_game_running} to false
@@ -1749,7 +1910,7 @@ on inventory close:
 			set {ctf_blue_team_inv} to top inventory of player
 
 on place of lava:
-	if event-player is in {@CTF_World_Name} or {@CTF_Nether_Name}:
+	if in_ctf(event-player):
 		if pvp is enabled in {@CTF_World_Name}:
 			stop
 		if {ctf_red_team::*} contains uuid of player:
